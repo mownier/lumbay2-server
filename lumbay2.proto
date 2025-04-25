@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package lumbay2sv;
+
+option go_package="lumbay2sv/main";
+
+service LumbayLumbay {
+    rpc SendRequest(Request) returns (Reply) {}
+}
+
+message Request {
+    oneof type {
+        AcquireClientIdRequest acquire_client_id_request = 1;
+    }
+}
+
+message Reply {
+    oneof type {
+        AcquireClientIdReply acquire_client_id_reply = 1;
+    }
+}
+
+message AcquireClientIdRequest {
+    string public_key = 1;
+}
+
+message AcquireClientIdReply {
+    string client_id = 1;
+}

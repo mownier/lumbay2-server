@@ -3,5 +3,6 @@ package main
 import "fmt"
 
 func main() {
-	fmt.Println("Hello")
+	s := newServer()
+	fmt.Printf("Hello, s = %v\n", s)
 }
