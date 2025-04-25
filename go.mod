@@ -8,6 +8,8 @@ require (
 	google.golang.org/protobuf v1.36.6
 )
 
+require github.com/google/uuid v1.6.0
+
 require (
 	github.com/hashicorp/mdns v1.0.6
 	github.com/miekg/dns v1.1.55 // indirect

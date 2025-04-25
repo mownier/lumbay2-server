@@ -7,3 +7,5 @@ lumbay2sv
 build/
 
 .env
+
+consumers.json

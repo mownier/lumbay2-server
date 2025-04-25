@@ -21,7 +21,6 @@ message Reply {
 }
 
 message AcquireClientIdRequest {
-    string public_key = 1;
 }
 
 message AcquireClientIdReply {
