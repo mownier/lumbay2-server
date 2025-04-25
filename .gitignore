@@ -1,0 +1,9 @@
+.DS_Store
+
+lumbay2sv
+
+*.exe
+
+build/
+
+.env
