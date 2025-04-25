@@ -17,7 +17,7 @@ import (
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("Unable to load env file")
+		log.Println("unable to load env file")
 	}
 
 	port := os.Getenv("LUMBAY2_SERVER_PORT")
