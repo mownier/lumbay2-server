@@ -26,6 +26,16 @@ func (s *safeMap[K, V]) set(k K, v V) {
 	s.data[k] = v
 }
 
+func (s *safeMap[K, V]) forEach(block func(k K, v V) bool) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	for k, v := range s.data {
+		if block(k, v) {
+			break
+		}
+	}
+}
+
 func newSafeMap[K comparable, V any]() *safeMap[K, V] {
 	return &safeMap[K, V]{data: make(map[K]V)}
 }

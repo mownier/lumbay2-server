@@ -11,18 +11,28 @@ service LumbayLumbay {
 message Request {
     oneof type {
         AcquireClientIdRequest acquire_client_id_request = 1;
+        AcquirePublicKeyRequest acquire_public_key_request = 2;
     }
 }
 
 message Reply {
     oneof type {
         AcquireClientIdReply acquire_client_id_reply = 1;
+        AcquirePublicKeyReply acquire_public_key_reply = 2;
     }
 }
 
 message AcquireClientIdRequest {
 }
 
+message AcquirePublicKeyRequest {
+    string name = 1;
+}
+
 message AcquireClientIdReply {
     string client_id = 1;
+}
+
+message AcquirePublicKeyReply {
+    string public_key = 1;
 }

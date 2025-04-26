@@ -35,6 +35,8 @@ func (s *server) sendRequestInternal(publicKey, clientId string, in *Request) (*
 	switch in.Type.(type) {
 	case *Request_AcquireClientIdRequest:
 		return s.acquireClientId(publicKey)
+	case *Request_AcquirePublicKeyRequest:
+		return s.acquirePublicKey(in.GetAcquirePublicKeyRequest())
 	}
 
 	return nil, status.Error(codes.InvalidArgument, "request not known")

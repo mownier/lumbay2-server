@@ -7,3 +7,11 @@ func (s *server) createAcquireClientIdReply(clientId string) *Reply {
 		},
 	}
 }
+
+func (s *server) createAcquirePublickKeyReply(publicKey string) *Reply {
+	return &Reply{
+		Type: &Reply_AcquirePublicKeyReply{
+			AcquirePublicKeyReply: &AcquirePublicKeyReply{PublicKey: publicKey},
+		},
+	}
+}
