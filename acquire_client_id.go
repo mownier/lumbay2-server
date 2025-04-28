@@ -10,6 +10,6 @@ func (s *server) acquireClientId(publicKey string) (*Reply, error) {
 		return nil, status.Error(codes.InvalidArgument, "unknown public key")
 	}
 	clientId := s.generateClientId(publicKey)
-	// TODO: Save public key, client id
+	s.storage.saveClientId(clientId)
 	return s.createAcquireClientIdReply(clientId), nil
 }

@@ -47,7 +47,8 @@ func main() {
 	}
 	defer db.Close()
 
-	server := newServer(&newStorageNoSql(db).storage)
+	noSqlStorage := newStorageNoSql(db)
+	server := newServer(noSqlStorage)
 
 	var consumersData []byte
 	if _, err := os.Stat(consumersPath); err == nil {

@@ -8,9 +8,12 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+const (
+	clientIdPrefix = "client_id:"
+)
+
 type storageNoSql struct {
 	db *badger.DB
-	storage
 }
 
 func newStorageNoSql(db *badger.DB) *storageNoSql {
@@ -18,35 +21,58 @@ func newStorageNoSql(db *badger.DB) *storageNoSql {
 }
 
 func (s *storageNoSql) saveClientId(clientId string) error {
+	key := clientIdPrefix + clientId
 	err := s.db.Update(func(txn *badger.Txn) error {
-		entry := badger.NewEntry([]byte(clientId), []byte{1})
+		entry := badger.NewEntry([]byte(key), []byte(clientId))
 		return txn.SetEntry(entry)
 	})
 	if err != nil {
-		log.Printf("unable to save client id %s: %v", clientId, err)
+		log.Printf("unable to save client id %s: %v\n", clientId, err)
 		return status.Error(codes.Internal, "client id not saved")
 	}
 	return nil
 }
 
 func (s *storageNoSql) containsClientId(clientId string) (bool, error) {
-	var value []byte
+	key := clientIdPrefix + clientId
 	err := s.db.View(func(txn *badger.Txn) error {
-		item, err := txn.Get([]byte(clientId))
+		_, err := txn.Get([]byte(key))
 		if err != nil {
 			return err
 		}
-		return item.Value(func(val []byte) error {
-			value = append([]byte{}, val...)
-			return nil
-		})
+		return nil
 	})
 	if err != nil {
-		log.Printf("unable to determine if db contains client id %s: %v", clientId, err)
+		log.Printf("unable to determine if db contains client id %s: %v\n", clientId, err)
+		if err == badger.ErrKeyNotFound {
+			return false, nil
+		}
 		return false, status.Error(codes.Internal, "client id existence cannot be determined")
 	}
-	if len(value) == 0 {
-		return false, nil
-	}
 	return true, nil
+}
+
+func (s *storageNoSql) getAllClientIds() ([]string, error) {
+	list := []string{}
+	err := s.db.View(func(txn *badger.Txn) error {
+		it := txn.NewIterator(badger.DefaultIteratorOptions)
+		defer it.Close()
+		prefix := []byte(clientIdPrefix)
+		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
+			item := it.Item()
+			err := item.Value(func(v []byte) error {
+				list = append(list, string(v))
+				return nil
+			})
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		log.Printf("unable to get all client ids: %v\n", err)
+		return nil, status.Error(codes.Internal, "failed to get all client ids")
+	}
+	return list, nil
 }

@@ -15,14 +15,14 @@ import (
 
 type server struct {
 	consumers *safeMap[string, *consumer]
-	storage   *storage
+	storage   storage
 	UnimplementedLumbayLumbayServer
 }
 
-func newServer(s *storage) *server {
+func newServer(storageImpl storage) *server {
 	return &server{
 		consumers: newSafeMap[string, *consumer](),
-		storage:   s,
+		storage:   storageImpl,
 	}
 }
 
