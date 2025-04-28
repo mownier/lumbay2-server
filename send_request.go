@@ -18,16 +18,17 @@ func (s *server) SendRequest(ctx context.Context, in *Request) (*Reply, error) {
 		clientId := ""
 		md, ok := metadata.FromIncomingContext(ctx)
 		if ok {
-			values := md.Get("public_key")
+			values := md.Get("public_key-bin")
 			if len(values) > 0 {
 				publicKey = values[0]
 			}
-			values = md.Get("client_id")
+			values = md.Get("client_id-bin")
 			if len(values) > 0 {
 				clientId = values[0]
 			}
 		}
-		return s.sendRequestInternal(publicKey, clientId, in)
+		r, e := s.sendRequestInternal(publicKey, clientId, in)
+		return r, e
 	}
 }
 
