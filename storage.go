@@ -1,5 +1,6 @@
 package main
 
 type storage interface {
-	validateClientId(clientId string) error
+	saveClientId(clientId string) error
+	containsClientId(clientId string) (bool, error)
 }
