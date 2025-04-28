@@ -1,10 +1,13 @@
 package main
 
+import "github.com/dgraph-io/badger/v4"
+
 type storageNoSql struct {
+	db *badger.DB
 	storage
 }
 
-func newStorageNoSql() *storageNoSql {
+func newStorageNoSql(db *badger.DB) *storageNoSql {
 	return &storageNoSql{}
 }
 

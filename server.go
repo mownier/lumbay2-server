@@ -19,10 +19,10 @@ type server struct {
 	UnimplementedLumbayLumbayServer
 }
 
-func newServer() *server {
+func newServer(s *storage) *server {
 	return &server{
 		consumers: newSafeMap[string, *consumer](),
-		storage:   &newStorageNoSql().storage,
+		storage:   s,
 	}
 }
 

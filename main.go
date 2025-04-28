@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/dgraph-io/badger/v4"
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 )
@@ -29,12 +30,24 @@ func main() {
 		port = "50052"
 	}
 
+	dbPath := os.Getenv("LUMBAY2_SERVER_DB")
+	if len(dbPath) == 0 {
+		dbPath = "./lumbay2svdb"
+	}
+
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
 	if err != nil {
 		log.Fatalf("failed to listen on port %s: %v\n", port, err)
 	}
 
-	server := newServer()
+	opts := badger.DefaultOptions(dbPath)
+	db, err := badger.Open(opts)
+	if err != nil {
+		log.Fatalf("failed to open db %s: %v\n", dbPath, err)
+	}
+	defer db.Close()
+
+	server := newServer(&newStorageNoSql(db).storage)
 
 	var consumersData []byte
 	if _, err := os.Stat(consumersPath); err == nil {
