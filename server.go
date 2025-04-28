@@ -26,7 +26,7 @@ func newServer(s *storage) *server {
 	}
 }
 
-func (s *server) generateKeyPair(keySize int) (privateKeyPEM, publicKeyPEM string, err error) {
+func (s *server) generateKeyPair() (privateKeyPEM, publicKeyPEM string, err error) {
 	curve := elliptic.P256()
 
 	privateKey, err := ecdsa.GenerateKey(curve, rand.Reader)

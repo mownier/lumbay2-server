@@ -59,7 +59,7 @@ func main() {
 		names := []string{"iOS", "android", "macOS", "linux", "windows", "browser"}
 		list := []consumer{}
 		for _, name := range names {
-			privateKey, publicKey, err := server.generateKeyPair(2048)
+			privateKey, publicKey, err := server.generateKeyPair()
 			if err != nil {
 				log.Fatalf("unable to generate key pair for %s: %v", name, err)
 			}
