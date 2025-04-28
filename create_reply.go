@@ -15,3 +15,11 @@ func (s *server) createAcquirePublickKeyReply(publicKey string) *Reply {
 		},
 	}
 }
+
+func (s *server) createGameReply() *Reply {
+	return &Reply{
+		Type: &Reply_CreateGameReply{
+			CreateGameReply: &CreateGameReply{},
+		},
+	}
+}

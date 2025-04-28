@@ -12,6 +12,7 @@ message Request {
     oneof type {
         AcquireClientIdRequest acquire_client_id_request = 1;
         AcquirePublicKeyRequest acquire_public_key_request = 2;
+        CreateGameRequest create_game_request = 3;
     }
 }
 
@@ -19,6 +20,7 @@ message Reply {
     oneof type {
         AcquireClientIdReply acquire_client_id_reply = 1;
         AcquirePublicKeyReply acquire_public_key_reply = 2;
+        CreateGameReply create_game_reply = 3;
     }
 }
 
@@ -35,4 +37,16 @@ message AcquireClientIdReply {
 
 message AcquirePublicKeyReply {
     string public_key = 1;
+}
+
+message CreateGameRequest {
+}
+
+message CreateGameReply {
+}
+
+message Game {
+    string id = 1;
+    string player1 = 2;
+    string player2 = 3;
 }
