@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type LumbayLumbayClient interface {
 	SendRequest(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Reply, error)
+	Subscribe(ctx context.Context, in *Empty, opts ...grpc.CallOption) (LumbayLumbay_SubscribeClient, error)
 }
 
 type lumbayLumbayClient struct {
@@ -38,11 +39,44 @@ func (c *lumbayLumbayClient) SendRequest(ctx context.Context, in *Request, opts 
 	return out, nil
 }
 
+func (c *lumbayLumbayClient) Subscribe(ctx context.Context, in *Empty, opts ...grpc.CallOption) (LumbayLumbay_SubscribeClient, error) {
+	stream, err := c.cc.NewStream(ctx, &LumbayLumbay_ServiceDesc.Streams[0], "/lumbay2sv.LumbayLumbay/Subscribe", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &lumbayLumbaySubscribeClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type LumbayLumbay_SubscribeClient interface {
+	Recv() (*Update, error)
+	grpc.ClientStream
+}
+
+type lumbayLumbaySubscribeClient struct {
+	grpc.ClientStream
+}
+
+func (x *lumbayLumbaySubscribeClient) Recv() (*Update, error) {
+	m := new(Update)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // LumbayLumbayServer is the server API for LumbayLumbay service.
 // All implementations must embed UnimplementedLumbayLumbayServer
 // for forward compatibility
 type LumbayLumbayServer interface {
 	SendRequest(context.Context, *Request) (*Reply, error)
+	Subscribe(*Empty, LumbayLumbay_SubscribeServer) error
 	mustEmbedUnimplementedLumbayLumbayServer()
 }
 
@@ -52,6 +86,9 @@ type UnimplementedLumbayLumbayServer struct {
 
 func (UnimplementedLumbayLumbayServer) SendRequest(context.Context, *Request) (*Reply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendRequest not implemented")
+}
+func (UnimplementedLumbayLumbayServer) Subscribe(*Empty, LumbayLumbay_SubscribeServer) error {
+	return status.Errorf(codes.Unimplemented, "method Subscribe not implemented")
 }
 func (UnimplementedLumbayLumbayServer) mustEmbedUnimplementedLumbayLumbayServer() {}
 
@@ -84,6 +121,27 @@ func _LumbayLumbay_SendRequest_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LumbayLumbay_Subscribe_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(LumbayLumbayServer).Subscribe(m, &lumbayLumbaySubscribeServer{stream})
+}
+
+type LumbayLumbay_SubscribeServer interface {
+	Send(*Update) error
+	grpc.ServerStream
+}
+
+type lumbayLumbaySubscribeServer struct {
+	grpc.ServerStream
+}
+
+func (x *lumbayLumbaySubscribeServer) Send(m *Update) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // LumbayLumbay_ServiceDesc is the grpc.ServiceDesc for LumbayLumbay service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -96,6 +154,12 @@ var LumbayLumbay_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _LumbayLumbay_SendRequest_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Subscribe",
+			Handler:       _LumbayLumbay_Subscribe_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "lumbay2.proto",
 }

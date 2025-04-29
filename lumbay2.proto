@@ -6,6 +6,15 @@ option go_package="lumbay2sv/main";
 
 service LumbayLumbay {
     rpc SendRequest(Request) returns (Reply) {}
+    rpc Subscribe(Empty) returns (stream Update) {}
+}
+
+message Update {
+    int64 sequence_number = 1;
+    oneof type {
+        Ping ping = 2;
+        YouAreInGameUpdate you_are_in_game_update = 3;
+    }
 }
 
 message Request {
@@ -23,6 +32,8 @@ message Reply {
         CreateGameReply create_game_reply = 3;
     }
 }
+
+message Empty {}
 
 message AcquireClientIdRequest {
 }
@@ -50,3 +61,11 @@ message Game {
     string player1 = 2;
     string player2 = 3;
 }
+
+message Client {
+    string id = 1;
+}
+
+message YouAreInGameUpdate {}
+
+message Ping {}

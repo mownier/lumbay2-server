@@ -14,15 +14,17 @@ import (
 )
 
 type server struct {
-	consumers *safeMap[string, *consumer]
-	storage   storage
+	consumers    *safeMap[string, *consumer]
+	clientSignal *safeMap[string, chan struct{}]
+	storage      storage
 	UnimplementedLumbayLumbayServer
 }
 
 func newServer(storageImpl storage) *server {
 	return &server{
-		consumers: newSafeMap[string, *consumer](),
-		storage:   storageImpl,
+		consumers:    newSafeMap[string, *consumer](),
+		clientSignal: newSafeMap[string, chan struct{}](),
+		storage:      storageImpl,
 	}
 }
 
@@ -56,14 +58,14 @@ func (s *server) generateKeyPair() (privateKeyPEM, publicKeyPEM string, err erro
 	return privateKeyPEM, publicKeyPEM, nil
 }
 
-func (s *server) generateClientId(publicKeyPEM string) string {
+func generateClientId(publicKeyPEM string) string {
 	publicKeyBytes := []byte(publicKeyPEM)
 	hash := sha256.Sum256(publicKeyBytes)
 	return hex.EncodeToString(hash[:])
 }
 
-func (s *server) verifyClientId(clientId, publicKeyPEM string) error {
-	generatedClientId := s.generateClientId(publicKeyPEM)
+func verifyClientId(clientId, publicKeyPEM string) error {
+	generatedClientId := generateClientId(publicKeyPEM)
 	if generatedClientId == clientId {
 		return nil
 	}

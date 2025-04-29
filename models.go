@@ -26,6 +26,12 @@ func (s *safeMap[K, V]) set(k K, v V) {
 	s.data[k] = v
 }
 
+func (m *safeMap[K, V]) delete(k K) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	delete(m.data, k)
+}
+
 func (s *safeMap[K, V]) forEach(block func(k K, v V) bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()

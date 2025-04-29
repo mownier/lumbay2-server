@@ -1,9 +1,13 @@
 package main
 
 type storage interface {
-	saveClientId(clientId string) error
-	containsClientId(clientId string) (bool, error)
-	getAllClientIds() ([]string, error)
+	insertClient(publicKeyPEM string) (*Client, error)
+	getClient(id string) (*Client, error)
+
 	insertGame(player1 string) (*Game, error)
-	hasGame(gameId string) (bool, error)
+	getGame(gameId string) (*Game, error)
+
+	getAllUpdates(clientId string) ([]*Update, error)
+	enqueueUpdate(clientId string, updateType isUpdate_Type) (*Update, error)
+	dequeueUpdates(clientId string, updates []*Update) error
 }
