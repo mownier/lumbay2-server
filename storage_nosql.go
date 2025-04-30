@@ -260,30 +260,65 @@ func (s *storageNoSql) insertGameCode(clientId string) (string, error) {
 	return gameCode, err
 }
 
-func (s *storageNoSql) updateGame(game *Game) error {
-	gameData, err := proto.Marshal(game)
+func (s *storageNoSql) joinGame(clientId, gameCode string) (*Game, error) {
+	var updatedGame *Game
+	gameCodeKey := fmt.Sprintf("%s%s", gameCodePrefix, gameCode)
+	err := s.db.Update(func(txn *badger.Txn) error {
+		item, err := txn.Get([]byte(gameCodeKey))
+		if err != nil {
+			return sverror(codes.NotFound, "failed to join game", err)
+		}
+		bytes, err := item.ValueCopy(nil)
+		if err != nil {
+			return sverror(codes.Internal, "failed to join game", err)
+		}
+		gameId := string(bytes)
+		gameKey := fmt.Sprintf("%s%s", gamePrefix, gameId)
+		item, err = txn.Get([]byte(gameKey))
+		if err != nil {
+			return sverror(codes.NotFound, "failed to join game", err)
+		}
+		bytes, err = item.ValueCopy(nil)
+		if err != nil {
+			return sverror(codes.Internal, "failed to join game", err)
+		}
+		game := &Game{}
+		err = proto.Unmarshal(bytes, game)
+		if err != nil {
+			return sverror(codes.Internal, "failed to join game", err)
+		}
+		if len(game.Player1) > 0 && len(game.Player2) > 0 {
+			return sverror(codes.Internal, "failed to join game because player count limit is reached", nil)
+		}
+		if len(game.Player1) == 0 {
+			game.Player1 = clientId
+		} else if len(game.Player2) == 0 {
+			game.Player2 = clientId
+		}
+		if len(game.Player1) > 0 && len(game.Player2) > 0 {
+			game.Status = GameStatus_READY_TO_START
+		} else {
+			game.Status = GameStatus_WAITING_FOR_OTHER_PLAYER
+		}
+		updatedGameData, err := proto.Marshal(game)
+		if err != nil {
+			return sverror(codes.Internal, "failed to join game", err)
+		}
+		gameClientKey := fmt.Sprintf("%s%s", gameClientPrefix, clientId)
+		err = txn.Set([]byte(gameKey), updatedGameData)
+		if err != nil {
+			return sverror(codes.Internal, "failed to join game", err)
+		}
+		err = txn.Set([]byte(gameClientKey), []byte(game.Id))
+		if err != nil {
+			return sverror(codes.Internal, "failed to join game", err)
+		}
+		return nil
+	})
 	if err != nil {
-		return sverror(codes.Internal, "failed to update game", err)
+		return nil, err
 	}
-	key := fmt.Sprintf("%s%s", gamePrefix, game.Id)
-	return s.db.Update(func(txn *badger.Txn) error {
-		err := txn.Set([]byte(key), gameData)
-		if err != nil {
-			return sverror(codes.Internal, "failed to update game", err)
-		}
-		return nil
-	})
-}
-
-func (s *storageNoSql) setGameForClient(gameId, clientId string) error {
-	gameClientKey := fmt.Sprintf("%s%s", gameClientPrefix, clientId)
-	return s.db.Update(func(txn *badger.Txn) error {
-		err := txn.Set([]byte(gameClientKey), []byte(gameId))
-		if err != nil {
-			return sverror(codes.Internal, "failed to set game for client", err)
-		}
-		return nil
-	})
+	return updatedGame, nil
 }
 
 func (s *storageNoSql) enqueueUpdate(clientId string, updateType isUpdate_Type) (*Update, error) {

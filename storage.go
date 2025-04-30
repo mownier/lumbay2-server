@@ -10,8 +10,7 @@ type storage interface {
 	getGameForClient(clientId string) (*Game, error)
 	getGameIdForGameCode(gameCode string) (string, error)
 	getGameCodeForGame(gameId string) (string, error)
-	updateGame(game *Game) error
-	setGameForClient(gameId, clientId string) error
+	joinGame(clientId, gameCode string) (*Game, error)
 
 	getAllUpdates(clientId string) ([]*Update, error)
 	enqueueUpdate(clientId string, updateType isUpdate_Type) (*Update, error)
