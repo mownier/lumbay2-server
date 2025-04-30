@@ -31,7 +31,11 @@ func (s *server) Subscribe(emp *Empty, stream LumbayLumbay_SubscribeServer) erro
 		if len(publicKey) == 0 {
 			return status.Error(codes.InvalidArgument, "failed to subscribe because public key is unknown")
 		}
-		err := verifyClientId(clientId, publicKey)
+		client, err := s.storage.getClient(clientId)
+		if err != nil {
+			return err
+		}
+		err = verifyClient(client, publicKey)
 		if err != nil {
 			return err
 		}
@@ -74,9 +78,10 @@ func (s *server) sendInitialUpdates(clientId string, stream LumbayLumbay_Subscri
 		case GameStatus_WAITING_FOR_OTHER_PLAYER:
 			updates = append(updates, s.newWaitingForOtherPlayerUpdate())
 		}
-	}
-	if len(game.GameCode) > 0 {
-		updates = append(updates, s.newGameCodeGeneratedUpdate(game.GameCode))
+		gameCode, _ := s.storage.getGameCodeForGame(game.Id)
+		if len(gameCode) > 0 {
+			updates = append(updates, s.newGameCodeGeneratedUpdate(gameCode))
+		}
 	}
 	for _, update := range updates {
 		err := stream.Send(&Update{Type: update})

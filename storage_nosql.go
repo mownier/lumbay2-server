@@ -18,6 +18,8 @@ const (
 	gameClientPrefix       = "game:client:"
 	clientLastSeqNumPrefix = "client:last_seq_num:"
 	clientUpdatePrefix     = "client:update:"
+	gameCodePrefix         = "game_code:"
+	gameGameCodePrefix     = "game:game_code:"
 )
 
 type storageNoSql struct {
@@ -29,7 +31,12 @@ func newStorageNoSql(db *badger.DB) *storageNoSql {
 }
 
 func (s *storageNoSql) insertClient(publicKeyPEM string) (*Client, error) {
-	client := &Client{Id: generateClientId(publicKeyPEM)}
+	salt := generateClientSalt()
+	client := &Client{
+		Id:   generateClientId(publicKeyPEM, salt),
+		Salt: salt,
+	}
+	log.Println("client:", client)
 	clientData, err := proto.Marshal(client)
 	if err != nil {
 		log.Printf("unable to marshal to be inserted client: %v\n", err)
@@ -78,11 +85,10 @@ func (s *storageNoSql) getClient(id string) (*Client, error) {
 
 func (s *storageNoSql) insertGame(player1 string) (*Game, error) {
 	game := &Game{
-		Id:       uuid.New().String(),
-		Player1:  player1,
-		Player2:  "",
-		Status:   GameStatus_WAITING_FOR_OTHER_PLAYER,
-		GameCode: "",
+		Id:      uuid.New().String(),
+		Player1: player1,
+		Player2: "",
+		Status:  GameStatus_WAITING_FOR_OTHER_PLAYER,
 	}
 	gameData, err := proto.Marshal(game)
 	if err != nil {
@@ -177,6 +183,99 @@ func (s *storageNoSql) getGameForClient(clientId string) (*Game, error) {
 	return game, nil
 }
 
+func (s *storageNoSql) getGameIdForGameCode(gameCode string) (string, error) {
+	gameId := ""
+	key := fmt.Sprintf("%s%s", gameCodePrefix, gameCode)
+	err := s.db.View(func(txn *badger.Txn) error {
+		item, err := txn.Get([]byte(key))
+		if err == badger.ErrKeyNotFound {
+			return nil
+		}
+		if err != nil {
+			log.Printf("unable to get game associated with game code %s: %v\n", gameCode, err)
+			return status.Error(codes.Internal, "failed to get game for game code")
+		}
+		bytes, err := item.ValueCopy(nil)
+		if err != nil {
+			log.Printf("unable to copy game id bytes associated with game code %s: %v\n", gameCode, err)
+			return status.Error(codes.Internal, "faield to copy game id bytes for game code")
+		}
+		gameId = string(bytes)
+		return nil
+	})
+	if err != nil {
+		return gameId, err
+	}
+	return gameId, nil
+}
+
+func (s *storageNoSql) getGameCodeForGame(gameId string) (string, error) {
+	gameCode := ""
+	key := fmt.Sprintf("%s%s", gameGameCodePrefix, gameId)
+	err := s.db.View(func(txn *badger.Txn) error {
+		item, err := txn.Get([]byte(key))
+		if err == badger.ErrKeyNotFound {
+			return nil
+		}
+		if err != nil {
+			log.Printf("unable to get game's game code: %v\n", err)
+			return status.Error(codes.Internal, "failed to get game's game code")
+		}
+		bytes, err := item.ValueCopy(nil)
+		if err != nil {
+			log.Printf("unable to copy bytes of game's game code: %v", err)
+			return status.Error(codes.Internal, "failed to copy bytes of game's game code")
+		}
+		gameCode = string(bytes)
+		return nil
+	})
+	if err != nil {
+		return gameCode, err
+	}
+	return gameCode, nil
+}
+
+func (s *storageNoSql) removeGameCode(gameCode, gameId string) error {
+	gameCodeKey := fmt.Sprintf("%s%s", gameCodePrefix, gameCode)
+	gameGameCodeKey := fmt.Sprintf("%s%s", gameGameCodePrefix, gameId)
+	return s.db.Update(func(txn *badger.Txn) error {
+		err := txn.Delete([]byte(gameCodeKey))
+		if err != nil {
+			log.Printf("unable to delete game code: %v\n", err)
+			return status.Error(codes.Internal, "failed to delete game code")
+		}
+		err = txn.Delete([]byte(gameGameCodeKey))
+		if err != nil {
+			log.Printf("unable to delete game's game code: %v\n", err)
+			return status.Error(codes.Internal, "failed to delete game's game code")
+		}
+		return nil
+	})
+}
+
+func (s *storageNoSql) insertGameCode(gameCode, gameId string) error {
+	gameCodeKey := fmt.Sprintf("%s%s", gameCodePrefix, gameCode)
+	gameGameCodeKey := fmt.Sprintf("%s%s", gameGameCodePrefix, gameId)
+	return s.db.Update(func(txn *badger.Txn) error {
+		_, err := txn.Get([]byte(gameCodeKey))
+		if err != nil && err != badger.ErrKeyNotFound {
+			log.Printf("unable to insert game code because it does exist already: %v\n", err)
+			return status.Error(codes.AlreadyExists, "game code already exists")
+		}
+		err = txn.Set([]byte(gameCodeKey), []byte(gameId))
+		if err != nil {
+			log.Printf("unable to set game code data: %v", err)
+			return status.Error(codes.Internal, "failed to insert game code")
+		}
+		err = txn.Set([]byte(gameGameCodeKey), []byte(gameCode))
+		if err != nil {
+			log.Printf("unable to set game's game code data: %v", err)
+			return status.Error(codes.Internal, "failed to insert game's game code")
+		}
+		return nil
+	})
+}
+
 func (s *storageNoSql) updateGame(game *Game) error {
 	gameData, err := proto.Marshal(game)
 	if err != nil {
@@ -185,7 +284,24 @@ func (s *storageNoSql) updateGame(game *Game) error {
 	}
 	key := fmt.Sprintf("%s%s", gamePrefix, game.Id)
 	return s.db.Update(func(txn *badger.Txn) error {
-		return txn.Set([]byte(key), gameData)
+		err := txn.Set([]byte(key), gameData)
+		if err != nil {
+			log.Printf("unable to set game data to be updated %s: %v\n", game.Id, err)
+			return status.Error(codes.Internal, "failed to set game data to be udpated")
+		}
+		return nil
+	})
+}
+
+func (s *storageNoSql) setGameForClient(gameId, clientId string) error {
+	gameClientKey := fmt.Sprintf("%s%s", gameClientPrefix, clientId)
+	return s.db.Update(func(txn *badger.Txn) error {
+		err := txn.Set([]byte(gameClientKey), []byte(gameId))
+		if err != nil {
+			log.Printf("unable to set game %s for client %s: %v\n", gameId, clientId, err)
+			return status.Error(codes.Internal, "failed to set game for client")
+		}
+		return nil
 	})
 }
 

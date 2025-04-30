@@ -32,6 +32,14 @@ func (s *server) newGenerateGameCodeReply() *Reply {
 	}
 }
 
+func (s *server) newJoinGameReply() *Reply {
+	return &Reply{
+		Type: &Reply_JoinGameReply{
+			JoinGameReply: &JoinGameReply{},
+		},
+	}
+}
+
 func (s *server) newWaitingForOtherPlayerUpdate() isUpdate_Type {
 	return &Update_WaitingForOtherPlayerUpdate{
 		WaitingForOtherPlayerUpdate: &WaitingForOtherPlayerUpdate{},

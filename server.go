@@ -11,6 +11,7 @@ import (
 	mrand "math/rand"
 	"time"
 
+	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -60,15 +61,21 @@ func (s *server) generateKeyPair() (privateKeyPEM, publicKeyPEM string, err erro
 	return privateKeyPEM, publicKeyPEM, nil
 }
 
-func generateClientId(publicKeyPEM string) string {
-	publicKeyBytes := []byte(publicKeyPEM)
+func generateClientId(publicKeyPEM, salt string) string {
+	publicKeyBytes := []byte(salt + publicKeyPEM)
 	hash := sha256.Sum256(publicKeyBytes)
 	return hex.EncodeToString(hash[:])
 }
 
-func verifyClientId(clientId, publicKeyPEM string) error {
-	generatedClientId := generateClientId(publicKeyPEM)
-	if generatedClientId == clientId {
+func generateClientSalt() string {
+	return uuid.New().String()
+}
+
+func verifyClient(client *Client, publicKeyPEM string) error {
+	dataToHash := []byte(client.Salt + publicKeyPEM)
+	expectedHash := sha256.Sum256(dataToHash)
+	expectedClientId := hex.EncodeToString(expectedHash[:])
+	if expectedClientId == client.Id {
 		return nil
 	}
 	return status.Error(codes.InvalidArgument, "invalid client id")
