@@ -234,14 +234,14 @@ func (s *storageNoSql) insertGameCode(clientId string) (string, error) {
 		gameGameCodeKey := fmt.Sprintf("%s%s", gameGameCodePrefix, gameId)
 		item, err = txn.Get([]byte(gameGameCodeKey))
 		if err != nil {
-			return sverror(codes.Internal, "failed to insert game code", err)
-		}
-		bytes, err = item.ValueCopy(nil)
-		if err != nil {
 			if err != badger.ErrKeyNotFound {
 				return sverror(codes.Internal, "failed to insert game code", err)
 			}
 		} else {
+			bytes, err := item.ValueCopy(nil)
+			if err != nil {
+				return sverror(codes.Internal, "failed to insert game code", err)
+			}
 			currentGameCode := string(bytes)
 			gameCodeKey := fmt.Sprintf("%s%s", gameCodePrefix, currentGameCode)
 			// ignore error on delete
@@ -313,6 +313,7 @@ func (s *storageNoSql) joinGame(clientId, gameCode string) (*Game, error) {
 		if err != nil {
 			return sverror(codes.Internal, "failed to join game", err)
 		}
+		updatedGame = game
 		return nil
 	})
 	if err != nil {
