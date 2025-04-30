@@ -254,6 +254,10 @@ func (s *storageNoSql) insertGameCode(clientId string) (string, error) {
 		if err != nil {
 			return sverror(codes.Internal, "failed to insert game code", err)
 		}
+		err = txn.Set([]byte(gameGameCodeKey), []byte(newGameCode))
+		if err != nil {
+			return sverror(codes.Internal, "failed to insert game code", err)
+		}
 		gameCode = newGameCode
 		return nil
 	})
