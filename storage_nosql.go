@@ -2,13 +2,11 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/dgraph-io/badger/v4"
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -36,18 +34,15 @@ func (s *storageNoSql) insertClient(publicKeyPEM string) (*Client, error) {
 		Id:   generateClientId(publicKeyPEM, salt),
 		Salt: salt,
 	}
-	log.Println("client:", client)
 	clientData, err := proto.Marshal(client)
 	if err != nil {
-		log.Printf("unable to marshal to be inserted client: %v\n", err)
-		return nil, status.Error(codes.Internal, "failed to marshal to be inserted client")
+		return nil, sverror(codes.Internal, "failed to insert client", err)
 	}
 	key := fmt.Sprintf("%s%s", clientPrefix, client.Id)
 	err = s.db.Update(func(txn *badger.Txn) error {
 		err := txn.Set([]byte(key), clientData)
 		if err != nil {
-			log.Printf("unable to insert client: %v\n", err)
-			return status.Error(codes.Internal, "failed to insert client")
+			return sverror(codes.Internal, "failed to insert client", err)
 		}
 		return nil
 	})
@@ -63,19 +58,19 @@ func (s *storageNoSql) getClient(id string) (*Client, error) {
 	err := s.db.View(func(txn *badger.Txn) error {
 		item, err := txn.Get([]byte(key))
 		if err != nil {
-			log.Printf("client with id %s not found: %v\n", id, err)
-			return status.Error(codes.NotFound, "client not found")
+			return sverror(codes.NotFound, "failed to get client", err)
 		}
-		return item.Value(func(val []byte) error {
-			c := &Client{}
-			err := proto.Unmarshal(val, c)
-			if err != nil {
-				log.Printf("unable to unmarshal found client with id %s: %v\n", id, err)
-				return status.Error(codes.Internal, "failed to unmarshal found client")
-			}
-			client = c
-			return nil
-		})
+		bytes, err := item.ValueCopy(nil)
+		if err != nil {
+			return sverror(codes.Internal, "failed to get client", err)
+		}
+		c := &Client{}
+		err = proto.Unmarshal(bytes, c)
+		if err != nil {
+			return sverror(codes.Internal, "failed to get client", err)
+		}
+		client = c
+		return nil
 	})
 	if err != nil {
 		return nil, err
@@ -92,21 +87,18 @@ func (s *storageNoSql) insertGame(player1 string) (*Game, error) {
 	}
 	gameData, err := proto.Marshal(game)
 	if err != nil {
-		log.Printf("unable to marshal to be inserted game: %v\n", err)
-		return nil, status.Error(codes.Internal, "failed to marshal to be inserted game")
+		return nil, sverror(codes.Internal, "failed to insert game", err)
 	}
 	gameKey := fmt.Sprintf("%s%s", gamePrefix, game.Id)
 	gameClientKey := fmt.Sprintf("%s%s", gameClientPrefix, game.Player1)
 	err = s.db.Update(func(txn *badger.Txn) error {
 		err := txn.Set([]byte(gameKey), gameData)
 		if err != nil {
-			log.Printf("unable to set game data %s: %v\n", player1, err)
-			return status.Error(codes.Internal, "failed to set game data")
+			return sverror(codes.Internal, "failed to insert game", err)
 		}
 		err = txn.Set([]byte(gameClientKey), []byte(game.Id))
 		if err != nil {
-			log.Printf("unable to set game-client data: %v\n", err)
-			return status.Error(codes.Internal, "failed to set game-client data")
+			return sverror(codes.Internal, "failed to insert game", err)
 		}
 		return nil
 	})
@@ -117,24 +109,24 @@ func (s *storageNoSql) insertGame(player1 string) (*Game, error) {
 }
 
 func (s *storageNoSql) getGame(id string) (*Game, error) {
-	key := fmt.Sprintf("%s%s", gamePrefix, id)
 	var game *Game
+	key := fmt.Sprintf("%s%s", gamePrefix, id)
 	err := s.db.View(func(txn *badger.Txn) error {
 		item, err := txn.Get([]byte(key))
 		if err != nil {
-			log.Printf("unable to get game with id %s: %v\n", id, err)
-			return status.Error(codes.Internal, "failed to get game")
+			return sverror(codes.NotFound, "failed to get game", err)
 		}
-		return item.Value(func(val []byte) error {
-			g := &Game{}
-			err := proto.Unmarshal(val, g)
-			if err != nil {
-				log.Printf("unable to unmarshal while getting game with id %s: %v\n", id, err)
-				return status.Error(codes.Internal, "failed to unmarshal while getting game")
-			}
-			game = g
-			return nil
-		})
+		bytes, err := item.ValueCopy(nil)
+		if err != nil {
+			return sverror(codes.Internal, "failed to get game", err)
+		}
+		g := &Game{}
+		err = proto.Unmarshal(bytes, g)
+		if err != nil {
+			return sverror(codes.Internal, "failed to get game", err)
+		}
+		game = g
+		return nil
 	})
 	if err != nil {
 		return nil, err
@@ -148,31 +140,26 @@ func (s *storageNoSql) getGameForClient(clientId string) (*Game, error) {
 	err := s.db.View(func(txn *badger.Txn) error {
 		item, err := txn.Get([]byte(key))
 		if err != nil {
-			log.Printf("unable to get game's id for client %s: %v\n", clientId, err)
-			return status.Error(codes.Internal, "failed to get game id")
+			return sverror(codes.NotFound, "failed to get game for client", err)
 		}
 		gameIdData, err := item.ValueCopy(nil)
 		if err != nil {
-			log.Printf("unable to get game id data for client %s: %v\n", clientId, err)
-			return status.Error(codes.Internal, "failed to get game id data")
+			return sverror(codes.Internal, "failed to get game for client", err)
 		}
 		gameId := string(gameIdData)
 		gameKey := fmt.Sprintf("%s%s", gamePrefix, gameId)
 		item, err = txn.Get([]byte(gameKey))
 		if err != nil {
-			log.Printf("unable to get game for client %s: %v\n", clientId, err)
-			return status.Error(codes.Internal, "failed to get game")
+			return sverror(codes.NotFound, "failed to get game for client", err)
 		}
 		gameData, err := item.ValueCopy(nil)
 		if err != nil {
-			log.Printf("unable to get game data for client %s: %v\n", clientId, err)
-			return status.Error(codes.Internal, "failed to get game data")
+			return sverror(codes.Internal, "failed to get game for client", err)
 		}
 		g := &Game{}
 		err = proto.Unmarshal(gameData, g)
 		if err != nil {
-			log.Printf("unable to marshal game for client %s: %v\n", clientId, err)
-			return status.Error(codes.Internal, "failed to marshal game")
+			return sverror(codes.Internal, "failed to get game for client", err)
 		}
 		game = g
 		return nil
@@ -192,13 +179,11 @@ func (s *storageNoSql) getGameIdForGameCode(gameCode string) (string, error) {
 			return nil
 		}
 		if err != nil {
-			log.Printf("unable to get game associated with game code %s: %v\n", gameCode, err)
-			return status.Error(codes.Internal, "failed to get game for game code")
+			return sverror(codes.Internal, "failed to get game id for game code", err)
 		}
 		bytes, err := item.ValueCopy(nil)
 		if err != nil {
-			log.Printf("unable to copy game id bytes associated with game code %s: %v\n", gameCode, err)
-			return status.Error(codes.Internal, "faield to copy game id bytes for game code")
+			return sverror(codes.Internal, "failed to get game id for game code", err)
 		}
 		gameId = string(bytes)
 		return nil
@@ -218,13 +203,11 @@ func (s *storageNoSql) getGameCodeForGame(gameId string) (string, error) {
 			return nil
 		}
 		if err != nil {
-			log.Printf("unable to get game's game code: %v\n", err)
-			return status.Error(codes.Internal, "failed to get game's game code")
+			return sverror(codes.Internal, "failed to get game code for game", err)
 		}
 		bytes, err := item.ValueCopy(nil)
 		if err != nil {
-			log.Printf("unable to copy bytes of game's game code: %v", err)
-			return status.Error(codes.Internal, "failed to copy bytes of game's game code")
+			return sverror(codes.Internal, "failed to get game code for game", err)
 		}
 		gameCode = string(bytes)
 		return nil
@@ -233,24 +216,6 @@ func (s *storageNoSql) getGameCodeForGame(gameId string) (string, error) {
 		return gameCode, err
 	}
 	return gameCode, nil
-}
-
-func (s *storageNoSql) removeGameCode(gameCode, gameId string) error {
-	gameCodeKey := fmt.Sprintf("%s%s", gameCodePrefix, gameCode)
-	gameGameCodeKey := fmt.Sprintf("%s%s", gameGameCodePrefix, gameId)
-	return s.db.Update(func(txn *badger.Txn) error {
-		err := txn.Delete([]byte(gameCodeKey))
-		if err != nil {
-			log.Printf("unable to delete game code: %v\n", err)
-			return status.Error(codes.Internal, "failed to delete game code")
-		}
-		err = txn.Delete([]byte(gameGameCodeKey))
-		if err != nil {
-			log.Printf("unable to delete game's game code: %v\n", err)
-			return status.Error(codes.Internal, "failed to delete game's game code")
-		}
-		return nil
-	})
 }
 
 func (s *storageNoSql) insertGameCode(clientId string) (string, error) {
@@ -298,15 +263,13 @@ func (s *storageNoSql) insertGameCode(clientId string) (string, error) {
 func (s *storageNoSql) updateGame(game *Game) error {
 	gameData, err := proto.Marshal(game)
 	if err != nil {
-		log.Printf("unable to marshal game %s when updating: %v\n", game.Id, err)
-		return status.Error(codes.Internal, "failed to update game")
+		return sverror(codes.Internal, "failed to update game", err)
 	}
 	key := fmt.Sprintf("%s%s", gamePrefix, game.Id)
 	return s.db.Update(func(txn *badger.Txn) error {
 		err := txn.Set([]byte(key), gameData)
 		if err != nil {
-			log.Printf("unable to set game data to be updated %s: %v\n", game.Id, err)
-			return status.Error(codes.Internal, "failed to set game data to be udpated")
+			return sverror(codes.Internal, "failed to update game", err)
 		}
 		return nil
 	})
@@ -317,8 +280,7 @@ func (s *storageNoSql) setGameForClient(gameId, clientId string) error {
 	return s.db.Update(func(txn *badger.Txn) error {
 		err := txn.Set([]byte(gameClientKey), []byte(gameId))
 		if err != nil {
-			log.Printf("unable to set game %s for client %s: %v\n", gameId, clientId, err)
-			return status.Error(codes.Internal, "failed to set game for client")
+			return sverror(codes.Internal, "failed to set game for client", err)
 		}
 		return nil
 	})
@@ -331,33 +293,28 @@ func (s *storageNoSql) enqueueUpdate(clientId string, updateType isUpdate_Type) 
 		var lastSeqNum int64 = 0
 		item, err := txn.Get([]byte(lastSeqNumKey))
 		if err != nil && err != badger.ErrKeyNotFound {
-			log.Printf("unable to get last sequence number of client %s: %v\n", clientId, err)
-			return status.Error(codes.Internal, "failed to get last sequence number")
+			return sverror(codes.NotFound, "failed to enqueue update", err)
 		}
 		if item != nil {
 			bytes, err := item.ValueCopy(nil)
 			if err != nil {
-				log.Printf("unable to copy last sequence number of client %s as bytes: %v\n", clientId, err)
-				return status.Error(codes.Internal, "failed to copy last sequence number")
+				return sverror(codes.Internal, "failed to enqueue update", err)
 			}
 			lastSeqNum, err = strconv.ParseInt(string(bytes), 10, 64)
 			if err != nil {
-				log.Printf("unable to parse sequence number bytes of client %s as int64: %v\n", clientId, err)
-				return status.Error(codes.Internal, "failed to parse last sequence number")
+				return sverror(codes.Internal, "failed to enqueue update", err)
 			}
 		}
 		nextSeqNum := lastSeqNum + 1
 		u := &Update{SequenceNumber: nextSeqNum, Type: updateType}
 		updateData, err := proto.Marshal(u)
 		if err != nil {
-			log.Printf("unable to marshal update to be enqueued for client %s: %v\n", clientId, err)
-			return status.Error(codes.Internal, "failed to marshal update to be enqueued")
+			return sverror(codes.Internal, "failed to enqueue update", err)
 		}
 		updatesKey := fmt.Sprintf("%s%s:%d", clientUpdatePrefix, clientId, nextSeqNum)
 		err = txn.Set([]byte(updatesKey), updateData)
 		if err != nil {
-			log.Printf("unable to enqueue update for client %s: %v\n", clientId, err)
-			return status.Error(codes.Internal, "failed to enqueue update")
+			return sverror(codes.Internal, "failed to enqueue update", err)
 		}
 		update = u
 		return nil
@@ -376,19 +333,15 @@ func (s *storageNoSql) getAllUpdates(clientId string) ([]*Update, error) {
 		prefix := []byte(clientUpdatePrefix)
 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 			item := it.Item()
-			err := item.Value(func(value []byte) error {
-				update := &Update{}
-				if err := proto.Unmarshal(value, update); err != nil {
-					log.Printf("unable to unmarshal update for client %s: %v\n", clientId, err)
-					return status.Error(codes.Internal, "failed to unmarshal update")
-				}
-				list = append(list, update)
-				return nil
-			})
+			bytes, err := item.ValueCopy(nil)
 			if err != nil {
-				log.Printf("unable to get update item value for client %s: %v\n", clientId, err)
-				return status.Error(codes.Internal, "failed to get update item value")
+				return sverror(codes.Internal, "failed to get all updates", err)
 			}
+			update := &Update{}
+			if err := proto.Unmarshal(bytes, update); err != nil {
+				return sverror(codes.Internal, "failed to get all updates", err)
+			}
+			list = append(list, update)
 		}
 		return nil
 	})
@@ -406,8 +359,7 @@ func (s *storageNoSql) dequeueUpdates(clientId string, updates []*Update) error 
 		for _, update := range updates {
 			key := fmt.Sprintf("%s%s:%d", clientUpdatePrefix, clientId, update.SequenceNumber)
 			if err := txn.Delete([]byte(key)); err != nil {
-				log.Printf("unable to dequeue %d update(s) for client %s: %v\n", len(updates), clientId, err)
-				return status.Error(codes.Internal, "failed to dequeue updates")
+				return sverror(codes.Internal, "failed to dequeue updates", err)
 			}
 		}
 		return nil
