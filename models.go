@@ -1,6 +1,12 @@
 package main
 
-import sync "sync"
+import (
+	"log"
+	sync "sync"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+)
 
 type consumer struct {
 	PublicKey  string `json:"public_key"`
@@ -44,4 +50,9 @@ func (s *safeMap[K, V]) forEach(block func(k K, v V) bool) {
 
 func newSafeMap[K comparable, V any]() *safeMap[K, V] {
 	return &safeMap[K, V]{data: make(map[K]V)}
+}
+
+func sverror(code codes.Code, msg string, err error) error {
+	log.Printf("%s: %v", msg, err)
+	return status.Error(code, msg)
 }

@@ -253,27 +253,46 @@ func (s *storageNoSql) removeGameCode(gameCode, gameId string) error {
 	})
 }
 
-func (s *storageNoSql) insertGameCode(gameCode, gameId string) error {
-	gameCodeKey := fmt.Sprintf("%s%s", gameCodePrefix, gameCode)
-	gameGameCodeKey := fmt.Sprintf("%s%s", gameGameCodePrefix, gameId)
-	return s.db.Update(func(txn *badger.Txn) error {
-		_, err := txn.Get([]byte(gameCodeKey))
-		if err != nil && err != badger.ErrKeyNotFound {
-			log.Printf("unable to insert game code because it does exist already: %v\n", err)
-			return status.Error(codes.AlreadyExists, "game code already exists")
+func (s *storageNoSql) insertGameCode(clientId string) (string, error) {
+	gameCode := ""
+	err := s.db.Update(func(txn *badger.Txn) error {
+		gameClientKey := fmt.Sprintf("%s%s", gameClientPrefix, clientId)
+		item, err := txn.Get([]byte(gameClientKey))
+		if err != nil {
+			return sverror(codes.Internal, "failed to insert game code", err)
 		}
+		bytes, err := item.ValueCopy(nil)
+		if err != nil {
+			return sverror(codes.Internal, "failed to insert game code", err)
+		}
+		gameId := string(bytes)
+		gameGameCodeKey := fmt.Sprintf("%s%s", gameGameCodePrefix, gameId)
+		item, err = txn.Get([]byte(gameGameCodeKey))
+		if err != nil {
+			return sverror(codes.Internal, "failed to insert game code", err)
+		}
+		bytes, err = item.ValueCopy(nil)
+		if err != nil {
+			if err != badger.ErrKeyNotFound {
+				return sverror(codes.Internal, "failed to insert game code", err)
+			}
+		} else {
+			currentGameCode := string(bytes)
+			gameCodeKey := fmt.Sprintf("%s%s", gameCodePrefix, currentGameCode)
+			// ignore error on delete
+			txn.Delete([]byte(gameGameCodeKey))
+			txn.Delete([]byte(gameCodeKey))
+		}
+		newGameCode := generateGameCode()
+		gameCodeKey := fmt.Sprintf("%s%s", gameCodePrefix, newGameCode)
 		err = txn.Set([]byte(gameCodeKey), []byte(gameId))
 		if err != nil {
-			log.Printf("unable to set game code data: %v", err)
-			return status.Error(codes.Internal, "failed to insert game code")
+			return sverror(codes.Internal, "failed to insert game code", err)
 		}
-		err = txn.Set([]byte(gameGameCodeKey), []byte(gameCode))
-		if err != nil {
-			log.Printf("unable to set game's game code data: %v", err)
-			return status.Error(codes.Internal, "failed to insert game's game code")
-		}
+		gameCode = newGameCode
 		return nil
 	})
+	return gameCode, err
 }
 
 func (s *storageNoSql) updateGame(game *Game) error {
