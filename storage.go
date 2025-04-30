@@ -6,6 +6,8 @@ type storage interface {
 
 	insertGame(player1 string) (*Game, error)
 	getGame(gameId string) (*Game, error)
+	getGameForClient(clientId string) (*Game, error)
+	updateGame(game *Game) error
 
 	getAllUpdates(clientId string) ([]*Update, error)
 	enqueueUpdate(clientId string, updateType isUpdate_Type) (*Update, error)

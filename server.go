@@ -8,6 +8,8 @@ import (
 	"crypto/x509"
 	"encoding/hex"
 	"encoding/pem"
+	mrand "math/rand"
+	"time"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -70,4 +72,19 @@ func verifyClientId(clientId, publicKeyPEM string) error {
 		return nil
 	}
 	return status.Error(codes.InvalidArgument, "invalid client id")
+}
+
+func generateCode(length int) string {
+	charset := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	source := mrand.NewSource(int64(time.Now().Nanosecond()))
+	r := mrand.New(source)
+	code := make([]byte, length)
+	for i := range code {
+		code[i] = charset[r.Intn(len(charset))]
+	}
+	return string(code)
+}
+
+func generateGameCode() string {
+	return generateCode(8)
 }

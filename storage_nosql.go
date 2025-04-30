@@ -77,21 +77,27 @@ func (s *storageNoSql) getClient(id string) (*Client, error) {
 }
 
 func (s *storageNoSql) insertGame(player1 string) (*Game, error) {
-	game := &Game{Id: uuid.New().String(), Player1: player1, Player2: ""}
+	game := &Game{
+		Id:       uuid.New().String(),
+		Player1:  player1,
+		Player2:  "",
+		Status:   GameStatus_WAITING_FOR_OTHER_PLAYER,
+		GameCode: "",
+	}
 	gameData, err := proto.Marshal(game)
 	if err != nil {
 		log.Printf("unable to marshal to be inserted game: %v\n", err)
 		return nil, status.Error(codes.Internal, "failed to marshal to be inserted game")
 	}
 	gameKey := fmt.Sprintf("%s%s", gamePrefix, game.Id)
-	gameClientKey := fmt.Sprintf("%s%s:%s", gameClientPrefix, game.Id, game.Player1)
+	gameClientKey := fmt.Sprintf("%s%s", gameClientPrefix, game.Player1)
 	err = s.db.Update(func(txn *badger.Txn) error {
 		err := txn.Set([]byte(gameKey), gameData)
 		if err != nil {
 			log.Printf("unable to set game data %s: %v\n", player1, err)
 			return status.Error(codes.Internal, "failed to set game data")
 		}
-		err = txn.Set([]byte(gameClientKey), []byte{})
+		err = txn.Set([]byte(gameClientKey), []byte(game.Id))
 		if err != nil {
 			log.Printf("unable to set game-client data: %v\n", err)
 			return status.Error(codes.Internal, "failed to set game-client data")
@@ -130,6 +136,59 @@ func (s *storageNoSql) getGame(id string) (*Game, error) {
 	return game, nil
 }
 
+func (s *storageNoSql) getGameForClient(clientId string) (*Game, error) {
+	var game *Game
+	key := fmt.Sprintf("%s%s", gameClientPrefix, clientId)
+	err := s.db.View(func(txn *badger.Txn) error {
+		item, err := txn.Get([]byte(key))
+		if err != nil {
+			log.Printf("unable to get game's id for client %s: %v\n", clientId, err)
+			return status.Error(codes.Internal, "failed to get game id")
+		}
+		gameIdData, err := item.ValueCopy(nil)
+		if err != nil {
+			log.Printf("unable to get game id data for client %s: %v\n", clientId, err)
+			return status.Error(codes.Internal, "failed to get game id data")
+		}
+		gameId := string(gameIdData)
+		gameKey := fmt.Sprintf("%s%s", gamePrefix, gameId)
+		item, err = txn.Get([]byte(gameKey))
+		if err != nil {
+			log.Printf("unable to get game for client %s: %v\n", clientId, err)
+			return status.Error(codes.Internal, "failed to get game")
+		}
+		gameData, err := item.ValueCopy(nil)
+		if err != nil {
+			log.Printf("unable to get game data for client %s: %v\n", clientId, err)
+			return status.Error(codes.Internal, "failed to get game data")
+		}
+		g := &Game{}
+		err = proto.Unmarshal(gameData, g)
+		if err != nil {
+			log.Printf("unable to marshal game for client %s: %v\n", clientId, err)
+			return status.Error(codes.Internal, "failed to marshal game")
+		}
+		game = g
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return game, nil
+}
+
+func (s *storageNoSql) updateGame(game *Game) error {
+	gameData, err := proto.Marshal(game)
+	if err != nil {
+		log.Printf("unable to marshal game %s when updating: %v\n", game.Id, err)
+		return status.Error(codes.Internal, "failed to update game")
+	}
+	key := fmt.Sprintf("%s%s", gamePrefix, game.Id)
+	return s.db.Update(func(txn *badger.Txn) error {
+		return txn.Set([]byte(key), gameData)
+	})
+}
+
 func (s *storageNoSql) enqueueUpdate(clientId string, updateType isUpdate_Type) (*Update, error) {
 	lastSeqNumKey := fmt.Sprintf("%s%s", clientLastSeqNumPrefix, clientId)
 	var update *Update
@@ -140,15 +199,17 @@ func (s *storageNoSql) enqueueUpdate(clientId string, updateType isUpdate_Type) 
 			log.Printf("unable to get last sequence number of client %s: %v\n", clientId, err)
 			return status.Error(codes.Internal, "failed to get last sequence number")
 		}
-		bytes, err := item.ValueCopy(nil)
-		if err != nil {
-			log.Printf("unable to copy last sequence number of client %s as bytes: %v\n", clientId, err)
-			return status.Error(codes.Internal, "failed to copy last sequence number")
-		}
-		lastSeqNum, err = strconv.ParseInt(string(bytes), 10, 64)
-		if err != nil {
-			log.Printf("unable to parse sequence number bytes of client %s as int64: %v\n", clientId, err)
-			return status.Error(codes.Internal, "failed to parse last sequence number")
+		if item != nil {
+			bytes, err := item.ValueCopy(nil)
+			if err != nil {
+				log.Printf("unable to copy last sequence number of client %s as bytes: %v\n", clientId, err)
+				return status.Error(codes.Internal, "failed to copy last sequence number")
+			}
+			lastSeqNum, err = strconv.ParseInt(string(bytes), 10, 64)
+			if err != nil {
+				log.Printf("unable to parse sequence number bytes of client %s as int64: %v\n", clientId, err)
+				return status.Error(codes.Internal, "failed to parse last sequence number")
+			}
 		}
 		nextSeqNum := lastSeqNum + 1
 		u := &Update{SequenceNumber: nextSeqNum, Type: updateType}

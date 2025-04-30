@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
@@ -65,22 +63,25 @@ func (s *server) cleanUpResources(clientId string) {
 }
 
 func (s *server) sendInitialUpdates(clientId string, stream LumbayLumbay_SubscribeServer) error {
-	list := []*Update{
-		{
-			Type: &Update_YouAreInGameUpdate{
-				YouAreInGameUpdate: &YouAreInGameUpdate{},
-			},
-		},
-		{
-			Type: &Update_Ping{
-				Ping: &Ping{},
-			},
-		},
+	updates := []isUpdate_Type{}
+	game, _ := s.storage.getGameForClient(clientId)
+	if game != nil {
+		switch game.Status {
+		case GameStatus_READY_TO_START:
+			updates = append(updates, s.newReadyToStartUpdate())
+		case GameStatus_STARTED:
+			updates = append(updates, s.newYouAreInGameUpdate())
+		case GameStatus_WAITING_FOR_OTHER_PLAYER:
+			updates = append(updates, s.newWaitingForOtherPlayerUpdate())
+		}
 	}
-	for _, update := range list {
-		if err := stream.Send(update); err != nil {
-			log.Printf("unable to send initial updates for client %s: %v\n", clientId, err)
-			return status.Error(codes.Internal, "failed to send intial updates")
+	if len(game.GameCode) > 0 {
+		updates = append(updates, s.newGameCodeGeneratedUpdate(game.GameCode))
+	}
+	for _, update := range updates {
+		err := stream.Send(&Update{Type: update})
+		if err != nil {
+			return err
 		}
 	}
 	return nil
@@ -107,4 +108,18 @@ func (s *server) sendUpdates(clientId string, stream LumbayLumbay_SubscribeServe
 		return err
 	}
 	return dequeueErr
+}
+
+func (s *server) enqueueUpdatesAndSignal(clientId string, updateTypes ...isUpdate_Type) {
+	for _, u := range updateTypes {
+		s.storage.enqueueUpdate(clientId, u)
+	}
+	if signal, exists := s.clientSignal.get(clientId); exists {
+		select {
+		case signal <- struct{}{}:
+			// Signal sent
+		default:
+			// Non-blocking send if the channel is full
+		}
+	}
 }

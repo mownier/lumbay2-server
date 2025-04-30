@@ -5,5 +5,6 @@ func (s *server) createGame(clientId string) (*Reply, error) {
 	if err != nil {
 		return nil, err
 	}
-	return s.createGameReply(), nil
+	s.enqueueUpdatesAndSignal(clientId, s.newWaitingForOtherPlayerUpdate())
+	return s.newCreateGameReply(), nil
 }

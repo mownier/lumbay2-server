@@ -40,6 +40,8 @@ func (s *server) sendRequestInternal(publicKey, clientId string, in *Request) (*
 		return s.acquirePublicKey(in.GetAcquirePublicKeyRequest())
 	case *Request_CreateGameRequest:
 		return s.createGame(clientId)
+	case *Request_GenerateGameCodeRequest:
+		return s.generateGameCode(clientId)
 	}
 
 	return nil, status.Error(codes.InvalidArgument, "request not known")
