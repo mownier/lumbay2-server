@@ -101,3 +101,9 @@ func (s *server) newGameStartedUpdate() isUpdate_Type {
 		GameStartedUpdate: &GameStartedUpdate{},
 	}
 }
+
+func (s *server) newWorldUpdate(world *World) isUpdate_Type {
+	return &Update_WorldUpdate{
+		WorldUpdate: &WorldUpdate{World: world},
+	}
+}

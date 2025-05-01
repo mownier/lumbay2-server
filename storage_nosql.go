@@ -571,7 +571,7 @@ func (s *storageNoSql) dequeueUpdates(clientId string, updates []*Update) error 
 	})
 }
 
-func (s *storageNoSql) insertWorld(world *World, clientIds []string) error {
+func (s *storageNoSql) insertWorld(world *World, clientIds ...string) error {
 	worldData, err := proto.Marshal(world)
 	if err != nil {
 		return sverror(codes.Internal, "failed to insert world", err)

@@ -5,9 +5,15 @@ func (s *server) startGame(clientId string) (*Reply, error) {
 	if err != nil {
 		return nil, err
 	}
-	if !startAlreadyInitiated {
-		s.enqueueUpdatesAndSignal(game.Player1, s.newGameStartedUpdate())
-		s.enqueueUpdatesAndSignal(game.Player2, s.newGameStartedUpdate())
+	if startAlreadyInitiated {
+		return s.newStartGameReply(), nil
 	}
+	world := newWorldOne(game.Player1, game.Player2)
+	err = s.storage.insertWorld(world, game.Player1, game.Player2)
+	if err != nil {
+		return nil, err
+	}
+	s.enqueueUpdatesAndSignal(game.Player1, s.newGameStartedUpdate(), s.newWorldUpdate(world))
+	s.enqueueUpdatesAndSignal(game.Player2, s.newGameStartedUpdate(), s.newWorldUpdate(world))
 	return s.newStartGameReply(), nil
 }
