@@ -12,6 +12,7 @@ type storage interface {
 	getGameCodeForGame(gameId string) (string, error)
 	joinGame(clientId, gameCode string) (*Game, error)
 	quitGame(clientId string) (*Game, error)
+	startGame(clientId string) (*Game, bool, error)
 
 	getAllUpdates(clientId string) ([]*Update, error)
 	enqueueUpdate(clientId string, updateType isUpdate_Type) (*Update, error)

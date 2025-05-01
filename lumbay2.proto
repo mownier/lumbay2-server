@@ -18,6 +18,7 @@ message Update {
         ReadyToStartUpdate ready_to_start_update = 5;
         GameCodeGeneratedUpdate game_code_generated = 6;
         YouQuitTheGameUpdate you_quit_the_game_update = 7;
+        GameStartedUpdate game_started_update = 8;
     }
 }
 
@@ -29,6 +30,7 @@ message Request {
         GenerateGameCodeRequest generate_game_code_request = 4;
         JoinGameRequest join_game_request = 5;
         QuitGameRequest quit_game_request = 6;
+        StartGameRequest start_game_request = 7;
     }
 }
 
@@ -40,6 +42,7 @@ message Reply {
         GenerateGameCodeReply generate_game_code_reply = 4;
         JoinGameReply join_game_reply = 5;
         QuitGameReply quit_game_reply = 6;
+        StartGameReply start_game_reply = 7;
     }
 }
 
@@ -85,6 +88,12 @@ message QuitGameRequest {
 message QuitGameReply {
 }
 
+message StartGameRequest {
+}
+
+message StartGameReply {
+}
+
 message Game {
     string id = 1;
     string player1 = 2;
@@ -114,6 +123,9 @@ message GameCodeGeneratedUpdate {
 }
 
 message YouQuitTheGameUpdate {
+}
+
+message GameStartedUpdate {
 }
 
 enum GameStatus {

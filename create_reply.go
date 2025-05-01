@@ -48,6 +48,14 @@ func (s *server) newQuitGameReply() *Reply {
 	}
 }
 
+func (s *server) newStartGameReply() *Reply {
+	return &Reply{
+		Type: &Reply_StartGameReply{
+			StartGameReply: &StartGameReply{},
+		},
+	}
+}
+
 func (s *server) newWaitingForOtherPlayerUpdate() isUpdate_Type {
 	return &Update_WaitingForOtherPlayerUpdate{
 		WaitingForOtherPlayerUpdate: &WaitingForOtherPlayerUpdate{},
@@ -77,5 +85,11 @@ func (s *server) newGameCodeGeneratedUpdate(gameCode string) isUpdate_Type {
 func (s *server) newYouQuitTheGameUpdate() isUpdate_Type {
 	return &Update_YouQuitTheGameUpdate{
 		YouQuitTheGameUpdate: &YouQuitTheGameUpdate{},
+	}
+}
+
+func (s *server) newGameStartedUpdate() isUpdate_Type {
+	return &Update_GameStartedUpdate{
+		GameStartedUpdate: &GameStartedUpdate{},
 	}
 }

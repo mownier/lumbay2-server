@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"sort"
 	"strconv"
 	"strings"
@@ -137,6 +138,7 @@ func (s *storageNoSql) getGame(id string) (*Game, error) {
 }
 
 func (s *storageNoSql) getGameForClient(clientId string) (*Game, error) {
+	log.Printf("get game for client %s\n", clientId)
 	var game *Game
 	key := fmt.Sprintf("%s%s", gameClientPrefix, clientId)
 	err := s.db.View(func(txn *badger.Txn) error {
@@ -394,6 +396,59 @@ func (s *storageNoSql) quitGame(clientId string) (*Game, error) {
 		return nil, err
 	}
 	return updatedGame, nil
+}
+
+func (s *storageNoSql) startGame(clientId string) (*Game, bool, error) {
+	var game *Game
+	var startAlreadyInitiated bool
+	gameClientKey := fmt.Sprintf("%s%s", gameClientPrefix, clientId)
+	err := s.db.Update(func(txn *badger.Txn) error {
+		item, err := txn.Get([]byte(gameClientKey))
+		if err != nil {
+			return sverror(codes.NotFound, "failed to start game", err)
+		}
+		bytes, err := item.ValueCopy(nil)
+		if err != nil {
+			return sverror(codes.Internal, "failed to start game", err)
+		}
+		gameId := string(bytes)
+		gameKey := fmt.Sprintf("%s%s", gamePrefix, gameId)
+		item, err = txn.Get([]byte(gameKey))
+		if err != nil {
+			return sverror(codes.NotFound, "failed to start game", err)
+		}
+		bytes, err = item.ValueCopy(nil)
+		if err != nil {
+			return sverror(codes.Internal, "failed to start game", err)
+		}
+		g := &Game{}
+		err = proto.Unmarshal(bytes, g)
+		if err != nil {
+			return sverror(codes.Internal, "failed to start game", err)
+		}
+		var initiatedAlready bool
+		if g.Status == GameStatus_STARTED {
+			initiatedAlready = true
+		} else {
+			g.Status = GameStatus_STARTED
+			initiatedAlready = false
+		}
+		gData, err := proto.Marshal(g)
+		if err != nil {
+			return sverror(codes.Internal, "failed to start game", err)
+		}
+		err = txn.Set([]byte(gameKey), gData)
+		if err != nil {
+			return sverror(codes.Internal, "failed to start game", err)
+		}
+		game = g
+		startAlreadyInitiated = initiatedAlready
+		return nil
+	})
+	if err != nil {
+		return game, startAlreadyInitiated, err
+	}
+	return game, startAlreadyInitiated, nil
 }
 
 func (s *storageNoSql) enqueueUpdate(clientId string, updateType isUpdate_Type) (*Update, error) {
