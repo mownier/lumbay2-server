@@ -17,5 +17,5 @@ func (s *server) joinGame(clientId, gameCode string) (*Reply, error) {
 			s.enqueueUpdatesAndSignal(game.Player2, s.newWaitingForOtherPlayerUpdate())
 		}
 	}
-	return s.newCreateGameReply(), nil
+	return s.newJoinGameReply(), nil
 }

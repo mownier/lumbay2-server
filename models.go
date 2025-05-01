@@ -56,3 +56,9 @@ func sverror(code codes.Code, msg string, err error) error {
 	log.Printf("%s: %v", msg, err)
 	return status.Error(code, msg)
 }
+
+type BySeqNum []*Update
+
+func (a BySeqNum) Len() int           { return len(a) }
+func (a BySeqNum) Less(i, j int) bool { return a[i].SequenceNumber < a[j].SequenceNumber }
+func (a BySeqNum) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }

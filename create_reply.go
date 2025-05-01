@@ -40,6 +40,14 @@ func (s *server) newJoinGameReply() *Reply {
 	}
 }
 
+func (s *server) newQuitGameReply() *Reply {
+	return &Reply{
+		Type: &Reply_QuitGameReply{
+			QuitGameReply: &QuitGameReply{},
+		},
+	}
+}
+
 func (s *server) newWaitingForOtherPlayerUpdate() isUpdate_Type {
 	return &Update_WaitingForOtherPlayerUpdate{
 		WaitingForOtherPlayerUpdate: &WaitingForOtherPlayerUpdate{},
@@ -63,5 +71,11 @@ func (s *server) newGameCodeGeneratedUpdate(gameCode string) isUpdate_Type {
 		GameCodeGenerated: &GameCodeGeneratedUpdate{
 			GameCode: gameCode,
 		},
+	}
+}
+
+func (s *server) newYouQuitTheGameUpdate() isUpdate_Type {
+	return &Update_YouQuitTheGameUpdate{
+		YouQuitTheGameUpdate: &YouQuitTheGameUpdate{},
 	}
 }

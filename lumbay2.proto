@@ -17,6 +17,7 @@ message Update {
         WaitingForOtherPlayerUpdate waiting_for_other_player_update = 4;
         ReadyToStartUpdate ready_to_start_update = 5;
         GameCodeGeneratedUpdate game_code_generated = 6;
+        YouQuitTheGameUpdate you_quit_the_game_update = 7;
     }
 }
 
@@ -27,6 +28,7 @@ message Request {
         CreateGameRequest create_game_request = 3;
         GenerateGameCodeRequest generate_game_code_request = 4;
         JoinGameRequest join_game_request = 5;
+        QuitGameRequest quit_game_request = 6;
     }
 }
 
@@ -37,6 +39,7 @@ message Reply {
         CreateGameReply create_game_reply = 3;
         GenerateGameCodeReply generate_game_code_reply = 4;
         JoinGameReply join_game_reply = 5;
+        QuitGameReply quit_game_reply = 6;
     }
 }
 
@@ -76,6 +79,12 @@ message JoinGameRequest {
 message JoinGameReply {
 }
 
+message QuitGameRequest {
+}
+
+message QuitGameReply {
+}
+
 message Game {
     string id = 1;
     string player1 = 2;
@@ -102,6 +111,9 @@ message ReadyToStartUpdate {
 
 message GameCodeGeneratedUpdate {
     string game_code = 1;
+}
+
+message YouQuitTheGameUpdate {
 }
 
 enum GameStatus {

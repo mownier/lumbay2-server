@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/dgraph-io/badger/v4"
 	"github.com/google/uuid"
@@ -270,29 +272,29 @@ func (s *storageNoSql) joinGame(clientId, gameCode string) (*Game, error) {
 	err := s.db.Update(func(txn *badger.Txn) error {
 		item, err := txn.Get([]byte(gameCodeKey))
 		if err != nil {
-			return sverror(codes.NotFound, "failed to join game", err)
+			return sverror(codes.NotFound, "1 failed to join game", err)
 		}
 		bytes, err := item.ValueCopy(nil)
 		if err != nil {
-			return sverror(codes.Internal, "failed to join game", err)
+			return sverror(codes.Internal, "2 failed to join game", err)
 		}
 		gameId := string(bytes)
 		gameKey := fmt.Sprintf("%s%s", gamePrefix, gameId)
 		item, err = txn.Get([]byte(gameKey))
 		if err != nil {
-			return sverror(codes.NotFound, "failed to join game", err)
+			return sverror(codes.NotFound, "3 failed to join game", err)
 		}
 		bytes, err = item.ValueCopy(nil)
 		if err != nil {
-			return sverror(codes.Internal, "failed to join game", err)
+			return sverror(codes.Internal, "4 failed to join game", err)
 		}
 		game := &Game{}
 		err = proto.Unmarshal(bytes, game)
 		if err != nil {
-			return sverror(codes.Internal, "failed to join game", err)
+			return sverror(codes.Internal, "5 failed to join game", err)
 		}
 		if len(game.Player1) > 0 && len(game.Player2) > 0 {
-			return sverror(codes.Internal, "failed to join game because player count limit is reached", nil)
+			return sverror(codes.Internal, "6 failed to join game because player count limit is reached", nil)
 		}
 		if len(game.Player1) == 0 {
 			game.Player1 = clientId
@@ -306,16 +308,84 @@ func (s *storageNoSql) joinGame(clientId, gameCode string) (*Game, error) {
 		}
 		updatedGameData, err := proto.Marshal(game)
 		if err != nil {
-			return sverror(codes.Internal, "failed to join game", err)
+			return sverror(codes.Internal, "7 failed to join game", err)
 		}
 		gameClientKey := fmt.Sprintf("%s%s", gameClientPrefix, clientId)
 		err = txn.Set([]byte(gameKey), updatedGameData)
 		if err != nil {
-			return sverror(codes.Internal, "failed to join game", err)
+			return sverror(codes.Internal, "8 failed to join game", err)
 		}
 		err = txn.Set([]byte(gameClientKey), []byte(game.Id))
 		if err != nil {
-			return sverror(codes.Internal, "failed to join game", err)
+			return sverror(codes.Internal, "9 failed to join game", err)
+		}
+		updatedGame = game
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return updatedGame, nil
+}
+
+func (s *storageNoSql) quitGame(clientId string) (*Game, error) {
+	var updatedGame *Game
+	gameClientKey := fmt.Sprintf("%s%s", gameClientPrefix, clientId)
+	err := s.db.Update(func(txn *badger.Txn) error {
+		item, err := txn.Get([]byte(gameClientKey))
+		if err != nil {
+			return sverror(codes.NotFound, "failed to quit game", err)
+		}
+		bytes, err := item.ValueCopy(nil)
+		if err != nil {
+			return sverror(codes.Internal, "failed to quit game", err)
+		}
+		gameId := string(bytes)
+		gameKey := fmt.Sprintf("%s%s", gamePrefix, gameId)
+		item, err = txn.Get([]byte(gameKey))
+		if err != nil {
+			return sverror(codes.NotFound, "failed to quit game", err)
+		}
+		bytes, err = item.ValueCopy(nil)
+		if err != nil {
+			return sverror(codes.Internal, "failed to quit game", err)
+		}
+		game := &Game{}
+		err = proto.Unmarshal(bytes, game)
+		if err != nil {
+			return sverror(codes.Internal, "failed to quit game", err)
+		}
+		if game.Player1 == clientId {
+			game.Player1 = ""
+		} else if game.Player2 == clientId {
+			game.Player2 = ""
+		} else {
+			return sverror(codes.Internal, "failed to quit game because you are not part of the game", nil)
+		}
+		if len(game.Player1) == 0 && len(game.Player2) == 0 {
+			game.Status = GameStatus_NONE
+		} else {
+			game.Status = GameStatus_WAITING_FOR_OTHER_PLAYER
+		}
+		switch game.Status {
+		case GameStatus_NONE:
+			err := txn.Delete([]byte(gameKey))
+			if err != nil {
+				return sverror(codes.Internal, "failed to quit game", err)
+			}
+		default:
+			updatedGameData, err := proto.Marshal(game)
+			if err != nil {
+				return sverror(codes.Internal, "failed to quit game", err)
+			}
+			err = txn.Set([]byte(gameKey), updatedGameData)
+			if err != nil {
+				return sverror(codes.Internal, "failed to quit game", err)
+			}
+		}
+		err = txn.Delete([]byte(gameClientKey))
+		if err != nil {
+			return sverror(codes.Internal, "failed to quit game", err)
 		}
 		updatedGame = game
 		return nil
@@ -340,10 +410,11 @@ func (s *storageNoSql) enqueueUpdate(clientId string, updateType isUpdate_Type) 
 			if err != nil {
 				return sverror(codes.Internal, "failed to enqueue update", err)
 			}
-			lastSeqNum, err = strconv.ParseInt(string(bytes), 10, 64)
+			seqNum, err := strconv.ParseInt(string(bytes), 10, 64)
 			if err != nil {
 				return sverror(codes.Internal, "failed to enqueue update", err)
 			}
+			lastSeqNum = seqNum
 		}
 		nextSeqNum := lastSeqNum + 1
 		u := &Update{SequenceNumber: nextSeqNum, Type: updateType}
@@ -366,13 +437,41 @@ func (s *storageNoSql) enqueueUpdate(clientId string, updateType isUpdate_Type) 
 }
 
 func (s *storageNoSql) getAllUpdates(clientId string) ([]*Update, error) {
+	lastSeqNumKey := fmt.Sprintf("%s%s", clientLastSeqNumPrefix, clientId)
 	list := []*Update{}
 	err := s.db.View(func(txn *badger.Txn) error {
+		var lastSeqNum int64 = 0
+		item, err := txn.Get([]byte(lastSeqNumKey))
+		if err == nil && item != nil {
+			bytes, err := item.ValueCopy(nil)
+			if err != nil {
+				return sverror(codes.Internal, "failed to get all updates", err)
+			}
+			num, err := strconv.ParseInt(string(bytes), 10, 64)
+			if err != nil {
+				return sverror(codes.Internal, "failed to get all updates", err)
+			}
+			lastSeqNum = num
+		}
 		it := txn.NewIterator(badger.DefaultIteratorOptions)
 		defer it.Close()
-		prefix := []byte(clientUpdatePrefix)
+		prefix := []byte(clientUpdatePrefix + clientId)
 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 			item := it.Item()
+			keyBytes := it.Item().KeyCopy(nil)
+			keyString := string(keyBytes)
+			suffix := strings.TrimPrefix(keyString, string(clientUpdatePrefix))
+			suffixParts := strings.Split(suffix, ":")
+			if len(suffixParts) != 2 {
+				return sverror(codes.Internal, "failed to get all updates, malformed key", nil)
+			}
+			seqNum, err := strconv.ParseInt(suffixParts[1], 10, 64)
+			if err != nil {
+				return sverror(codes.Internal, "failed to get all updates", err)
+			}
+			if seqNum <= lastSeqNum {
+				continue
+			}
 			bytes, err := item.ValueCopy(nil)
 			if err != nil {
 				return sverror(codes.Internal, "failed to get all updates", err)
@@ -388,6 +487,7 @@ func (s *storageNoSql) getAllUpdates(clientId string) ([]*Update, error) {
 	if err != nil {
 		return nil, err
 	}
+	sort.Sort(BySeqNum(list))
 	return list, nil
 }
 
@@ -395,11 +495,19 @@ func (s *storageNoSql) dequeueUpdates(clientId string, updates []*Update) error 
 	if len(updates) == 0 {
 		return nil
 	}
+	sort.Sort(BySeqNum(updates))
 	return s.db.Update(func(txn *badger.Txn) error {
-		for _, update := range updates {
+		for index, update := range updates {
 			key := fmt.Sprintf("%s%s:%d", clientUpdatePrefix, clientId, update.SequenceNumber)
 			if err := txn.Delete([]byte(key)); err != nil {
 				return sverror(codes.Internal, "failed to dequeue updates", err)
+			}
+			if index == len(updates)-1 {
+				lastSeqNumKey := fmt.Sprintf("%s%s", clientLastSeqNumPrefix, clientId)
+				err := txn.Set([]byte(lastSeqNumKey), []byte(fmt.Sprintf("%d", update.SequenceNumber)))
+				if err != nil {
+					return sverror(codes.Internal, "failed to dequeue updates", err)
+				}
 			}
 		}
 		return nil
