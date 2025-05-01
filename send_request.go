@@ -48,6 +48,8 @@ func (s *server) sendRequestInternal(publicKey, clientId string, in *Request) (*
 		return s.quitGame(clientId)
 	case *Request_StartGameRequest:
 		return s.startGame(clientId)
+	case *Request_AmendWorldObjectRequest:
+		return s.amendWorldObject(clientId, in.GetAmendWorldObjectRequest())
 	}
 
 	return nil, status.Error(codes.InvalidArgument, "request not known")

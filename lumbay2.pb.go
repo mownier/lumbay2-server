@@ -72,6 +72,64 @@ func (GameStatus) EnumDescriptor() ([]byte, []int) {
 	return file_lumbay2_proto_rawDescGZIP(), []int{0}
 }
 
+type WorldStatus3X3 int32
+
+const (
+	WorldStatus3X3_WS3X3_NOTHING          WorldStatus3X3 = 0
+	WorldStatus3X3_WS3X3_PLAYER_1_TO_MOVE WorldStatus3X3 = 1
+	WorldStatus3X3_WS3X3_PLAYER_2_TO_MOVE WorldStatus3X3 = 2
+	WorldStatus3X3_WS3X3_PLAYER_1_WINS    WorldStatus3X3 = 3
+	WorldStatus3X3_WS3X3_PLAYER_2_WINS    WorldStatus3X3 = 4
+	WorldStatus3X3_WS3x3_DRAW             WorldStatus3X3 = 5
+)
+
+// Enum value maps for WorldStatus3X3.
+var (
+	WorldStatus3X3_name = map[int32]string{
+		0: "WS3X3_NOTHING",
+		1: "WS3X3_PLAYER_1_TO_MOVE",
+		2: "WS3X3_PLAYER_2_TO_MOVE",
+		3: "WS3X3_PLAYER_1_WINS",
+		4: "WS3X3_PLAYER_2_WINS",
+		5: "WS3x3_DRAW",
+	}
+	WorldStatus3X3_value = map[string]int32{
+		"WS3X3_NOTHING":          0,
+		"WS3X3_PLAYER_1_TO_MOVE": 1,
+		"WS3X3_PLAYER_2_TO_MOVE": 2,
+		"WS3X3_PLAYER_1_WINS":    3,
+		"WS3X3_PLAYER_2_WINS":    4,
+		"WS3x3_DRAW":             5,
+	}
+)
+
+func (x WorldStatus3X3) Enum() *WorldStatus3X3 {
+	p := new(WorldStatus3X3)
+	*p = x
+	return p
+}
+
+func (x WorldStatus3X3) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (WorldStatus3X3) Descriptor() protoreflect.EnumDescriptor {
+	return file_lumbay2_proto_enumTypes[1].Descriptor()
+}
+
+func (WorldStatus3X3) Type() protoreflect.EnumType {
+	return &file_lumbay2_proto_enumTypes[1]
+}
+
+func (x WorldStatus3X3) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use WorldStatus3X3.Descriptor instead.
+func (WorldStatus3X3) EnumDescriptor() ([]byte, []int) {
+	return file_lumbay2_proto_rawDescGZIP(), []int{1}
+}
+
 type Update struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -86,6 +144,10 @@ type Update struct {
 	//	*Update_GameCodeGenerated
 	//	*Update_YouQuitTheGameUpdate
 	//	*Update_GameStartedUpdate
+	//	*Update_WorldUpdate
+	//	*Update_WorldStatusUpdate
+	//	*Update_WorldRegionStatusUpdate
+	//	*Update_WorldObjectUpdate
 	Type isUpdate_Type `protobuf_oneof:"type"`
 }
 
@@ -184,6 +246,34 @@ func (x *Update) GetGameStartedUpdate() *GameStartedUpdate {
 	return nil
 }
 
+func (x *Update) GetWorldUpdate() *WorldUpdate {
+	if x, ok := x.GetType().(*Update_WorldUpdate); ok {
+		return x.WorldUpdate
+	}
+	return nil
+}
+
+func (x *Update) GetWorldStatusUpdate() *WorldStatusUpdate {
+	if x, ok := x.GetType().(*Update_WorldStatusUpdate); ok {
+		return x.WorldStatusUpdate
+	}
+	return nil
+}
+
+func (x *Update) GetWorldRegionStatusUpdate() *WorldRegionStatusUpdate {
+	if x, ok := x.GetType().(*Update_WorldRegionStatusUpdate); ok {
+		return x.WorldRegionStatusUpdate
+	}
+	return nil
+}
+
+func (x *Update) GetWorldObjectUpdate() *WorldObjectUpdate {
+	if x, ok := x.GetType().(*Update_WorldObjectUpdate); ok {
+		return x.WorldObjectUpdate
+	}
+	return nil
+}
+
 type isUpdate_Type interface {
 	isUpdate_Type()
 }
@@ -216,6 +306,22 @@ type Update_GameStartedUpdate struct {
 	GameStartedUpdate *GameStartedUpdate `protobuf:"bytes,8,opt,name=game_started_update,json=gameStartedUpdate,proto3,oneof"`
 }
 
+type Update_WorldUpdate struct {
+	WorldUpdate *WorldUpdate `protobuf:"bytes,9,opt,name=world_update,json=worldUpdate,proto3,oneof"`
+}
+
+type Update_WorldStatusUpdate struct {
+	WorldStatusUpdate *WorldStatusUpdate `protobuf:"bytes,10,opt,name=world_status_update,json=worldStatusUpdate,proto3,oneof"`
+}
+
+type Update_WorldRegionStatusUpdate struct {
+	WorldRegionStatusUpdate *WorldRegionStatusUpdate `protobuf:"bytes,11,opt,name=world_region_status_update,json=worldRegionStatusUpdate,proto3,oneof"`
+}
+
+type Update_WorldObjectUpdate struct {
+	WorldObjectUpdate *WorldObjectUpdate `protobuf:"bytes,12,opt,name=world_object_update,json=worldObjectUpdate,proto3,oneof"`
+}
+
 func (*Update_Ping) isUpdate_Type() {}
 
 func (*Update_YouAreInGameUpdate) isUpdate_Type() {}
@@ -230,6 +336,14 @@ func (*Update_YouQuitTheGameUpdate) isUpdate_Type() {}
 
 func (*Update_GameStartedUpdate) isUpdate_Type() {}
 
+func (*Update_WorldUpdate) isUpdate_Type() {}
+
+func (*Update_WorldStatusUpdate) isUpdate_Type() {}
+
+func (*Update_WorldRegionStatusUpdate) isUpdate_Type() {}
+
+func (*Update_WorldObjectUpdate) isUpdate_Type() {}
+
 type Request struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -243,6 +357,7 @@ type Request struct {
 	//	*Request_JoinGameRequest
 	//	*Request_QuitGameRequest
 	//	*Request_StartGameRequest
+	//	*Request_AmendWorldObjectRequest
 	Type isRequest_Type `protobuf_oneof:"type"`
 }
 
@@ -334,6 +449,13 @@ func (x *Request) GetStartGameRequest() *StartGameRequest {
 	return nil
 }
 
+func (x *Request) GetAmendWorldObjectRequest() *AmendWorldObjectRequest {
+	if x, ok := x.GetType().(*Request_AmendWorldObjectRequest); ok {
+		return x.AmendWorldObjectRequest
+	}
+	return nil
+}
+
 type isRequest_Type interface {
 	isRequest_Type()
 }
@@ -366,6 +488,10 @@ type Request_StartGameRequest struct {
 	StartGameRequest *StartGameRequest `protobuf:"bytes,7,opt,name=start_game_request,json=startGameRequest,proto3,oneof"`
 }
 
+type Request_AmendWorldObjectRequest struct {
+	AmendWorldObjectRequest *AmendWorldObjectRequest `protobuf:"bytes,8,opt,name=amend_world_object_request,json=amendWorldObjectRequest,proto3,oneof"`
+}
+
 func (*Request_AcquireClientIdRequest) isRequest_Type() {}
 
 func (*Request_AcquirePublicKeyRequest) isRequest_Type() {}
@@ -380,6 +506,8 @@ func (*Request_QuitGameRequest) isRequest_Type() {}
 
 func (*Request_StartGameRequest) isRequest_Type() {}
 
+func (*Request_AmendWorldObjectRequest) isRequest_Type() {}
+
 type Reply struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -393,6 +521,7 @@ type Reply struct {
 	//	*Reply_JoinGameReply
 	//	*Reply_QuitGameReply
 	//	*Reply_StartGameReply
+	//	*Reply_AmendWorldObjectReply
 	Type isReply_Type `protobuf_oneof:"type"`
 }
 
@@ -484,6 +613,13 @@ func (x *Reply) GetStartGameReply() *StartGameReply {
 	return nil
 }
 
+func (x *Reply) GetAmendWorldObjectReply() *AmendWorldObjectReply {
+	if x, ok := x.GetType().(*Reply_AmendWorldObjectReply); ok {
+		return x.AmendWorldObjectReply
+	}
+	return nil
+}
+
 type isReply_Type interface {
 	isReply_Type()
 }
@@ -516,6 +652,10 @@ type Reply_StartGameReply struct {
 	StartGameReply *StartGameReply `protobuf:"bytes,7,opt,name=start_game_reply,json=startGameReply,proto3,oneof"`
 }
 
+type Reply_AmendWorldObjectReply struct {
+	AmendWorldObjectReply *AmendWorldObjectReply `protobuf:"bytes,8,opt,name=amend_world_object_reply,json=amendWorldObjectReply,proto3,oneof"`
+}
+
 func (*Reply_AcquireClientIdReply) isReply_Type() {}
 
 func (*Reply_AcquirePublicKeyReply) isReply_Type() {}
@@ -530,6 +670,74 @@ func (*Reply_QuitGameReply) isReply_Type() {}
 
 func (*Reply_StartGameReply) isReply_Type() {}
 
+func (*Reply_AmendWorldObjectReply) isReply_Type() {}
+
+type WorldStatus struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// Types that are assignable to Type:
+	//	*WorldStatus_WorldStatus_3X3
+	Type isWorldStatus_Type `protobuf_oneof:"type"`
+}
+
+func (x *WorldStatus) Reset() {
+	*x = WorldStatus{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_lumbay2_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *WorldStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WorldStatus) ProtoMessage() {}
+
+func (x *WorldStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_lumbay2_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WorldStatus.ProtoReflect.Descriptor instead.
+func (*WorldStatus) Descriptor() ([]byte, []int) {
+	return file_lumbay2_proto_rawDescGZIP(), []int{3}
+}
+
+func (m *WorldStatus) GetType() isWorldStatus_Type {
+	if m != nil {
+		return m.Type
+	}
+	return nil
+}
+
+func (x *WorldStatus) GetWorldStatus_3X3() WorldStatus3X3 {
+	if x, ok := x.GetType().(*WorldStatus_WorldStatus_3X3); ok {
+		return x.WorldStatus_3X3
+	}
+	return WorldStatus3X3_WS3X3_NOTHING
+}
+
+type isWorldStatus_Type interface {
+	isWorldStatus_Type()
+}
+
+type WorldStatus_WorldStatus_3X3 struct {
+	WorldStatus_3X3 WorldStatus3X3 `protobuf:"varint,1,opt,name=world_status_3x3,json=worldStatus3x3,proto3,enum=lumbay2sv.WorldStatus3X3,oneof"`
+}
+
+func (*WorldStatus_WorldStatus_3X3) isWorldStatus_Type() {}
+
 type Empty struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -539,7 +747,7 @@ type Empty struct {
 func (x *Empty) Reset() {
 	*x = Empty{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_lumbay2_proto_msgTypes[3]
+		mi := &file_lumbay2_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -552,7 +760,7 @@ func (x *Empty) String() string {
 func (*Empty) ProtoMessage() {}
 
 func (x *Empty) ProtoReflect() protoreflect.Message {
-	mi := &file_lumbay2_proto_msgTypes[3]
+	mi := &file_lumbay2_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -565,7 +773,7 @@ func (x *Empty) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Empty.ProtoReflect.Descriptor instead.
 func (*Empty) Descriptor() ([]byte, []int) {
-	return file_lumbay2_proto_rawDescGZIP(), []int{3}
+	return file_lumbay2_proto_rawDescGZIP(), []int{4}
 }
 
 type AcquireClientIdRequest struct {
@@ -577,7 +785,7 @@ type AcquireClientIdRequest struct {
 func (x *AcquireClientIdRequest) Reset() {
 	*x = AcquireClientIdRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_lumbay2_proto_msgTypes[4]
+		mi := &file_lumbay2_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -590,7 +798,7 @@ func (x *AcquireClientIdRequest) String() string {
 func (*AcquireClientIdRequest) ProtoMessage() {}
 
 func (x *AcquireClientIdRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lumbay2_proto_msgTypes[4]
+	mi := &file_lumbay2_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -603,7 +811,7 @@ func (x *AcquireClientIdRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AcquireClientIdRequest.ProtoReflect.Descriptor instead.
 func (*AcquireClientIdRequest) Descriptor() ([]byte, []int) {
-	return file_lumbay2_proto_rawDescGZIP(), []int{4}
+	return file_lumbay2_proto_rawDescGZIP(), []int{5}
 }
 
 type AcquirePublicKeyRequest struct {
@@ -617,7 +825,7 @@ type AcquirePublicKeyRequest struct {
 func (x *AcquirePublicKeyRequest) Reset() {
 	*x = AcquirePublicKeyRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_lumbay2_proto_msgTypes[5]
+		mi := &file_lumbay2_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -630,7 +838,7 @@ func (x *AcquirePublicKeyRequest) String() string {
 func (*AcquirePublicKeyRequest) ProtoMessage() {}
 
 func (x *AcquirePublicKeyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lumbay2_proto_msgTypes[5]
+	mi := &file_lumbay2_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -643,7 +851,7 @@ func (x *AcquirePublicKeyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AcquirePublicKeyRequest.ProtoReflect.Descriptor instead.
 func (*AcquirePublicKeyRequest) Descriptor() ([]byte, []int) {
-	return file_lumbay2_proto_rawDescGZIP(), []int{5}
+	return file_lumbay2_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *AcquirePublicKeyRequest) GetName() string {
@@ -664,7 +872,7 @@ type AcquireClientIdReply struct {
 func (x *AcquireClientIdReply) Reset() {
 	*x = AcquireClientIdReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_lumbay2_proto_msgTypes[6]
+		mi := &file_lumbay2_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -677,7 +885,7 @@ func (x *AcquireClientIdReply) String() string {
 func (*AcquireClientIdReply) ProtoMessage() {}
 
 func (x *AcquireClientIdReply) ProtoReflect() protoreflect.Message {
-	mi := &file_lumbay2_proto_msgTypes[6]
+	mi := &file_lumbay2_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -690,7 +898,7 @@ func (x *AcquireClientIdReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AcquireClientIdReply.ProtoReflect.Descriptor instead.
 func (*AcquireClientIdReply) Descriptor() ([]byte, []int) {
-	return file_lumbay2_proto_rawDescGZIP(), []int{6}
+	return file_lumbay2_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *AcquireClientIdReply) GetClientId() string {
@@ -711,7 +919,7 @@ type AcquirePublicKeyReply struct {
 func (x *AcquirePublicKeyReply) Reset() {
 	*x = AcquirePublicKeyReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_lumbay2_proto_msgTypes[7]
+		mi := &file_lumbay2_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -724,7 +932,7 @@ func (x *AcquirePublicKeyReply) String() string {
 func (*AcquirePublicKeyReply) ProtoMessage() {}
 
 func (x *AcquirePublicKeyReply) ProtoReflect() protoreflect.Message {
-	mi := &file_lumbay2_proto_msgTypes[7]
+	mi := &file_lumbay2_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -737,7 +945,7 @@ func (x *AcquirePublicKeyReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AcquirePublicKeyReply.ProtoReflect.Descriptor instead.
 func (*AcquirePublicKeyReply) Descriptor() ([]byte, []int) {
-	return file_lumbay2_proto_rawDescGZIP(), []int{7}
+	return file_lumbay2_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *AcquirePublicKeyReply) GetPublicKey() string {
@@ -756,7 +964,7 @@ type CreateGameRequest struct {
 func (x *CreateGameRequest) Reset() {
 	*x = CreateGameRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_lumbay2_proto_msgTypes[8]
+		mi := &file_lumbay2_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -769,7 +977,7 @@ func (x *CreateGameRequest) String() string {
 func (*CreateGameRequest) ProtoMessage() {}
 
 func (x *CreateGameRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lumbay2_proto_msgTypes[8]
+	mi := &file_lumbay2_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -782,7 +990,7 @@ func (x *CreateGameRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateGameRequest.ProtoReflect.Descriptor instead.
 func (*CreateGameRequest) Descriptor() ([]byte, []int) {
-	return file_lumbay2_proto_rawDescGZIP(), []int{8}
+	return file_lumbay2_proto_rawDescGZIP(), []int{9}
 }
 
 type CreateGameReply struct {
@@ -794,7 +1002,7 @@ type CreateGameReply struct {
 func (x *CreateGameReply) Reset() {
 	*x = CreateGameReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_lumbay2_proto_msgTypes[9]
+		mi := &file_lumbay2_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -807,7 +1015,7 @@ func (x *CreateGameReply) String() string {
 func (*CreateGameReply) ProtoMessage() {}
 
 func (x *CreateGameReply) ProtoReflect() protoreflect.Message {
-	mi := &file_lumbay2_proto_msgTypes[9]
+	mi := &file_lumbay2_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -820,7 +1028,7 @@ func (x *CreateGameReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateGameReply.ProtoReflect.Descriptor instead.
 func (*CreateGameReply) Descriptor() ([]byte, []int) {
-	return file_lumbay2_proto_rawDescGZIP(), []int{9}
+	return file_lumbay2_proto_rawDescGZIP(), []int{10}
 }
 
 type GenerateGameCodeRequest struct {
@@ -832,7 +1040,7 @@ type GenerateGameCodeRequest struct {
 func (x *GenerateGameCodeRequest) Reset() {
 	*x = GenerateGameCodeRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_lumbay2_proto_msgTypes[10]
+		mi := &file_lumbay2_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -845,7 +1053,7 @@ func (x *GenerateGameCodeRequest) String() string {
 func (*GenerateGameCodeRequest) ProtoMessage() {}
 
 func (x *GenerateGameCodeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lumbay2_proto_msgTypes[10]
+	mi := &file_lumbay2_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -858,7 +1066,7 @@ func (x *GenerateGameCodeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GenerateGameCodeRequest.ProtoReflect.Descriptor instead.
 func (*GenerateGameCodeRequest) Descriptor() ([]byte, []int) {
-	return file_lumbay2_proto_rawDescGZIP(), []int{10}
+	return file_lumbay2_proto_rawDescGZIP(), []int{11}
 }
 
 type GenerateGameCodeReply struct {
@@ -870,7 +1078,7 @@ type GenerateGameCodeReply struct {
 func (x *GenerateGameCodeReply) Reset() {
 	*x = GenerateGameCodeReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_lumbay2_proto_msgTypes[11]
+		mi := &file_lumbay2_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -883,7 +1091,7 @@ func (x *GenerateGameCodeReply) String() string {
 func (*GenerateGameCodeReply) ProtoMessage() {}
 
 func (x *GenerateGameCodeReply) ProtoReflect() protoreflect.Message {
-	mi := &file_lumbay2_proto_msgTypes[11]
+	mi := &file_lumbay2_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -896,7 +1104,7 @@ func (x *GenerateGameCodeReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GenerateGameCodeReply.ProtoReflect.Descriptor instead.
 func (*GenerateGameCodeReply) Descriptor() ([]byte, []int) {
-	return file_lumbay2_proto_rawDescGZIP(), []int{11}
+	return file_lumbay2_proto_rawDescGZIP(), []int{12}
 }
 
 type JoinGameRequest struct {
@@ -910,7 +1118,7 @@ type JoinGameRequest struct {
 func (x *JoinGameRequest) Reset() {
 	*x = JoinGameRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_lumbay2_proto_msgTypes[12]
+		mi := &file_lumbay2_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -923,7 +1131,7 @@ func (x *JoinGameRequest) String() string {
 func (*JoinGameRequest) ProtoMessage() {}
 
 func (x *JoinGameRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lumbay2_proto_msgTypes[12]
+	mi := &file_lumbay2_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -936,7 +1144,7 @@ func (x *JoinGameRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JoinGameRequest.ProtoReflect.Descriptor instead.
 func (*JoinGameRequest) Descriptor() ([]byte, []int) {
-	return file_lumbay2_proto_rawDescGZIP(), []int{12}
+	return file_lumbay2_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *JoinGameRequest) GetGameCode() string {
@@ -955,7 +1163,7 @@ type JoinGameReply struct {
 func (x *JoinGameReply) Reset() {
 	*x = JoinGameReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_lumbay2_proto_msgTypes[13]
+		mi := &file_lumbay2_proto_msgTypes[14]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -968,7 +1176,7 @@ func (x *JoinGameReply) String() string {
 func (*JoinGameReply) ProtoMessage() {}
 
 func (x *JoinGameReply) ProtoReflect() protoreflect.Message {
-	mi := &file_lumbay2_proto_msgTypes[13]
+	mi := &file_lumbay2_proto_msgTypes[14]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -981,7 +1189,7 @@ func (x *JoinGameReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JoinGameReply.ProtoReflect.Descriptor instead.
 func (*JoinGameReply) Descriptor() ([]byte, []int) {
-	return file_lumbay2_proto_rawDescGZIP(), []int{13}
+	return file_lumbay2_proto_rawDescGZIP(), []int{14}
 }
 
 type QuitGameRequest struct {
@@ -993,7 +1201,7 @@ type QuitGameRequest struct {
 func (x *QuitGameRequest) Reset() {
 	*x = QuitGameRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_lumbay2_proto_msgTypes[14]
+		mi := &file_lumbay2_proto_msgTypes[15]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1006,7 +1214,7 @@ func (x *QuitGameRequest) String() string {
 func (*QuitGameRequest) ProtoMessage() {}
 
 func (x *QuitGameRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lumbay2_proto_msgTypes[14]
+	mi := &file_lumbay2_proto_msgTypes[15]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1019,7 +1227,7 @@ func (x *QuitGameRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QuitGameRequest.ProtoReflect.Descriptor instead.
 func (*QuitGameRequest) Descriptor() ([]byte, []int) {
-	return file_lumbay2_proto_rawDescGZIP(), []int{14}
+	return file_lumbay2_proto_rawDescGZIP(), []int{15}
 }
 
 type QuitGameReply struct {
@@ -1031,7 +1239,7 @@ type QuitGameReply struct {
 func (x *QuitGameReply) Reset() {
 	*x = QuitGameReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_lumbay2_proto_msgTypes[15]
+		mi := &file_lumbay2_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1044,7 +1252,7 @@ func (x *QuitGameReply) String() string {
 func (*QuitGameReply) ProtoMessage() {}
 
 func (x *QuitGameReply) ProtoReflect() protoreflect.Message {
-	mi := &file_lumbay2_proto_msgTypes[15]
+	mi := &file_lumbay2_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1057,7 +1265,7 @@ func (x *QuitGameReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QuitGameReply.ProtoReflect.Descriptor instead.
 func (*QuitGameReply) Descriptor() ([]byte, []int) {
-	return file_lumbay2_proto_rawDescGZIP(), []int{15}
+	return file_lumbay2_proto_rawDescGZIP(), []int{16}
 }
 
 type StartGameRequest struct {
@@ -1069,7 +1277,7 @@ type StartGameRequest struct {
 func (x *StartGameRequest) Reset() {
 	*x = StartGameRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_lumbay2_proto_msgTypes[16]
+		mi := &file_lumbay2_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1082,7 +1290,7 @@ func (x *StartGameRequest) String() string {
 func (*StartGameRequest) ProtoMessage() {}
 
 func (x *StartGameRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lumbay2_proto_msgTypes[16]
+	mi := &file_lumbay2_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1095,7 +1303,7 @@ func (x *StartGameRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartGameRequest.ProtoReflect.Descriptor instead.
 func (*StartGameRequest) Descriptor() ([]byte, []int) {
-	return file_lumbay2_proto_rawDescGZIP(), []int{16}
+	return file_lumbay2_proto_rawDescGZIP(), []int{17}
 }
 
 type StartGameReply struct {
@@ -1107,7 +1315,7 @@ type StartGameReply struct {
 func (x *StartGameReply) Reset() {
 	*x = StartGameReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_lumbay2_proto_msgTypes[17]
+		mi := &file_lumbay2_proto_msgTypes[18]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1120,7 +1328,7 @@ func (x *StartGameReply) String() string {
 func (*StartGameReply) ProtoMessage() {}
 
 func (x *StartGameReply) ProtoReflect() protoreflect.Message {
-	mi := &file_lumbay2_proto_msgTypes[17]
+	mi := &file_lumbay2_proto_msgTypes[18]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1133,7 +1341,108 @@ func (x *StartGameReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartGameReply.ProtoReflect.Descriptor instead.
 func (*StartGameReply) Descriptor() ([]byte, []int) {
-	return file_lumbay2_proto_rawDescGZIP(), []int{17}
+	return file_lumbay2_proto_rawDescGZIP(), []int{18}
+}
+
+type AmendWorldObjectRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	WorldId       string       `protobuf:"bytes,1,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"`
+	WorldRegionId string       `protobuf:"bytes,2,opt,name=world_region_id,json=worldRegionId,proto3" json:"world_region_id,omitempty"`
+	WorldObject   *WorldObject `protobuf:"bytes,3,opt,name=world_object,json=worldObject,proto3" json:"world_object,omitempty"`
+}
+
+func (x *AmendWorldObjectRequest) Reset() {
+	*x = AmendWorldObjectRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_lumbay2_proto_msgTypes[19]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AmendWorldObjectRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AmendWorldObjectRequest) ProtoMessage() {}
+
+func (x *AmendWorldObjectRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_lumbay2_proto_msgTypes[19]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AmendWorldObjectRequest.ProtoReflect.Descriptor instead.
+func (*AmendWorldObjectRequest) Descriptor() ([]byte, []int) {
+	return file_lumbay2_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *AmendWorldObjectRequest) GetWorldId() string {
+	if x != nil {
+		return x.WorldId
+	}
+	return ""
+}
+
+func (x *AmendWorldObjectRequest) GetWorldRegionId() string {
+	if x != nil {
+		return x.WorldRegionId
+	}
+	return ""
+}
+
+func (x *AmendWorldObjectRequest) GetWorldObject() *WorldObject {
+	if x != nil {
+		return x.WorldObject
+	}
+	return nil
+}
+
+type AmendWorldObjectReply struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *AmendWorldObjectReply) Reset() {
+	*x = AmendWorldObjectReply{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_lumbay2_proto_msgTypes[20]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AmendWorldObjectReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AmendWorldObjectReply) ProtoMessage() {}
+
+func (x *AmendWorldObjectReply) ProtoReflect() protoreflect.Message {
+	mi := &file_lumbay2_proto_msgTypes[20]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AmendWorldObjectReply.ProtoReflect.Descriptor instead.
+func (*AmendWorldObjectReply) Descriptor() ([]byte, []int) {
+	return file_lumbay2_proto_rawDescGZIP(), []int{20}
 }
 
 type Game struct {
@@ -1150,7 +1459,7 @@ type Game struct {
 func (x *Game) Reset() {
 	*x = Game{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_lumbay2_proto_msgTypes[18]
+		mi := &file_lumbay2_proto_msgTypes[21]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1163,7 +1472,7 @@ func (x *Game) String() string {
 func (*Game) ProtoMessage() {}
 
 func (x *Game) ProtoReflect() protoreflect.Message {
-	mi := &file_lumbay2_proto_msgTypes[18]
+	mi := &file_lumbay2_proto_msgTypes[21]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1176,7 +1485,7 @@ func (x *Game) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Game.ProtoReflect.Descriptor instead.
 func (*Game) Descriptor() ([]byte, []int) {
-	return file_lumbay2_proto_rawDescGZIP(), []int{18}
+	return file_lumbay2_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *Game) GetId() string {
@@ -1219,7 +1528,7 @@ type Client struct {
 func (x *Client) Reset() {
 	*x = Client{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_lumbay2_proto_msgTypes[19]
+		mi := &file_lumbay2_proto_msgTypes[22]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1232,7 +1541,7 @@ func (x *Client) String() string {
 func (*Client) ProtoMessage() {}
 
 func (x *Client) ProtoReflect() protoreflect.Message {
-	mi := &file_lumbay2_proto_msgTypes[19]
+	mi := &file_lumbay2_proto_msgTypes[22]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1245,7 +1554,7 @@ func (x *Client) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Client.ProtoReflect.Descriptor instead.
 func (*Client) Descriptor() ([]byte, []int) {
-	return file_lumbay2_proto_rawDescGZIP(), []int{19}
+	return file_lumbay2_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *Client) GetId() string {
@@ -1262,6 +1571,321 @@ func (x *Client) GetSalt() string {
 	return ""
 }
 
+type World struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id     string         `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Status *WorldStatus   `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	Map    *WorldMap      `protobuf:"bytes,3,opt,name=map,proto3" json:"map,omitempty"`
+	Region []*WorldRegion `protobuf:"bytes,4,rep,name=region,proto3" json:"region,omitempty"`
+}
+
+func (x *World) Reset() {
+	*x = World{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_lumbay2_proto_msgTypes[23]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *World) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*World) ProtoMessage() {}
+
+func (x *World) ProtoReflect() protoreflect.Message {
+	mi := &file_lumbay2_proto_msgTypes[23]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use World.ProtoReflect.Descriptor instead.
+func (*World) Descriptor() ([]byte, []int) {
+	return file_lumbay2_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *World) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *World) GetStatus() *WorldStatus {
+	if x != nil {
+		return x.Status
+	}
+	return nil
+}
+
+func (x *World) GetMap() *WorldMap {
+	if x != nil {
+		return x.Map
+	}
+	return nil
+}
+
+func (x *World) GetRegion() []*WorldRegion {
+	if x != nil {
+		return x.Region
+	}
+	return nil
+}
+
+type WorldRegion struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id      string         `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Status  *WorldStatus   `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	Map     *WorldMap      `protobuf:"bytes,3,opt,name=map,proto3" json:"map,omitempty"`
+	Objects []*WorldObject `protobuf:"bytes,4,rep,name=objects,proto3" json:"objects,omitempty"`
+}
+
+func (x *WorldRegion) Reset() {
+	*x = WorldRegion{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_lumbay2_proto_msgTypes[24]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *WorldRegion) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WorldRegion) ProtoMessage() {}
+
+func (x *WorldRegion) ProtoReflect() protoreflect.Message {
+	mi := &file_lumbay2_proto_msgTypes[24]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WorldRegion.ProtoReflect.Descriptor instead.
+func (*WorldRegion) Descriptor() ([]byte, []int) {
+	return file_lumbay2_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *WorldRegion) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *WorldRegion) GetStatus() *WorldStatus {
+	if x != nil {
+		return x.Status
+	}
+	return nil
+}
+
+func (x *WorldRegion) GetMap() *WorldMap {
+	if x != nil {
+		return x.Map
+	}
+	return nil
+}
+
+func (x *WorldRegion) GetObjects() []*WorldObject {
+	if x != nil {
+		return x.Objects
+	}
+	return nil
+}
+
+type WorldMap struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id     string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Height int64  `protobuf:"varint,2,opt,name=height,proto3" json:"height,omitempty"`
+	Width  int64  `protobuf:"varint,3,opt,name=width,proto3" json:"width,omitempty"`
+}
+
+func (x *WorldMap) Reset() {
+	*x = WorldMap{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_lumbay2_proto_msgTypes[25]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *WorldMap) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WorldMap) ProtoMessage() {}
+
+func (x *WorldMap) ProtoReflect() protoreflect.Message {
+	mi := &file_lumbay2_proto_msgTypes[25]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WorldMap.ProtoReflect.Descriptor instead.
+func (*WorldMap) Descriptor() ([]byte, []int) {
+	return file_lumbay2_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *WorldMap) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *WorldMap) GetHeight() int64 {
+	if x != nil {
+		return x.Height
+	}
+	return 0
+}
+
+func (x *WorldMap) GetWidth() int64 {
+	if x != nil {
+		return x.Width
+	}
+	return 0
+}
+
+type WorldMapLocation struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	X int64 `protobuf:"varint,1,opt,name=x,proto3" json:"x,omitempty"`
+	Y int64 `protobuf:"varint,2,opt,name=y,proto3" json:"y,omitempty"`
+}
+
+func (x *WorldMapLocation) Reset() {
+	*x = WorldMapLocation{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_lumbay2_proto_msgTypes[26]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *WorldMapLocation) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WorldMapLocation) ProtoMessage() {}
+
+func (x *WorldMapLocation) ProtoReflect() protoreflect.Message {
+	mi := &file_lumbay2_proto_msgTypes[26]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WorldMapLocation.ProtoReflect.Descriptor instead.
+func (*WorldMapLocation) Descriptor() ([]byte, []int) {
+	return file_lumbay2_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *WorldMapLocation) GetX() int64 {
+	if x != nil {
+		return x.X
+	}
+	return 0
+}
+
+func (x *WorldMapLocation) GetY() int64 {
+	if x != nil {
+		return x.Y
+	}
+	return 0
+}
+
+type WorldObject struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id       string            `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Location *WorldMapLocation `protobuf:"bytes,2,opt,name=location,proto3" json:"location,omitempty"`
+}
+
+func (x *WorldObject) Reset() {
+	*x = WorldObject{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_lumbay2_proto_msgTypes[27]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *WorldObject) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WorldObject) ProtoMessage() {}
+
+func (x *WorldObject) ProtoReflect() protoreflect.Message {
+	mi := &file_lumbay2_proto_msgTypes[27]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WorldObject.ProtoReflect.Descriptor instead.
+func (*WorldObject) Descriptor() ([]byte, []int) {
+	return file_lumbay2_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *WorldObject) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *WorldObject) GetLocation() *WorldMapLocation {
+	if x != nil {
+		return x.Location
+	}
+	return nil
+}
+
 type Ping struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1271,7 +1895,7 @@ type Ping struct {
 func (x *Ping) Reset() {
 	*x = Ping{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_lumbay2_proto_msgTypes[20]
+		mi := &file_lumbay2_proto_msgTypes[28]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1284,7 +1908,7 @@ func (x *Ping) String() string {
 func (*Ping) ProtoMessage() {}
 
 func (x *Ping) ProtoReflect() protoreflect.Message {
-	mi := &file_lumbay2_proto_msgTypes[20]
+	mi := &file_lumbay2_proto_msgTypes[28]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1297,7 +1921,7 @@ func (x *Ping) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Ping.ProtoReflect.Descriptor instead.
 func (*Ping) Descriptor() ([]byte, []int) {
-	return file_lumbay2_proto_rawDescGZIP(), []int{20}
+	return file_lumbay2_proto_rawDescGZIP(), []int{28}
 }
 
 type YouAreInGameUpdate struct {
@@ -1309,7 +1933,7 @@ type YouAreInGameUpdate struct {
 func (x *YouAreInGameUpdate) Reset() {
 	*x = YouAreInGameUpdate{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_lumbay2_proto_msgTypes[21]
+		mi := &file_lumbay2_proto_msgTypes[29]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1322,7 +1946,7 @@ func (x *YouAreInGameUpdate) String() string {
 func (*YouAreInGameUpdate) ProtoMessage() {}
 
 func (x *YouAreInGameUpdate) ProtoReflect() protoreflect.Message {
-	mi := &file_lumbay2_proto_msgTypes[21]
+	mi := &file_lumbay2_proto_msgTypes[29]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1335,7 +1959,7 @@ func (x *YouAreInGameUpdate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use YouAreInGameUpdate.ProtoReflect.Descriptor instead.
 func (*YouAreInGameUpdate) Descriptor() ([]byte, []int) {
-	return file_lumbay2_proto_rawDescGZIP(), []int{21}
+	return file_lumbay2_proto_rawDescGZIP(), []int{29}
 }
 
 type WaitingForOtherPlayerUpdate struct {
@@ -1347,7 +1971,7 @@ type WaitingForOtherPlayerUpdate struct {
 func (x *WaitingForOtherPlayerUpdate) Reset() {
 	*x = WaitingForOtherPlayerUpdate{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_lumbay2_proto_msgTypes[22]
+		mi := &file_lumbay2_proto_msgTypes[30]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1360,7 +1984,7 @@ func (x *WaitingForOtherPlayerUpdate) String() string {
 func (*WaitingForOtherPlayerUpdate) ProtoMessage() {}
 
 func (x *WaitingForOtherPlayerUpdate) ProtoReflect() protoreflect.Message {
-	mi := &file_lumbay2_proto_msgTypes[22]
+	mi := &file_lumbay2_proto_msgTypes[30]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1373,7 +1997,7 @@ func (x *WaitingForOtherPlayerUpdate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WaitingForOtherPlayerUpdate.ProtoReflect.Descriptor instead.
 func (*WaitingForOtherPlayerUpdate) Descriptor() ([]byte, []int) {
-	return file_lumbay2_proto_rawDescGZIP(), []int{22}
+	return file_lumbay2_proto_rawDescGZIP(), []int{30}
 }
 
 type ReadyToStartUpdate struct {
@@ -1385,7 +2009,7 @@ type ReadyToStartUpdate struct {
 func (x *ReadyToStartUpdate) Reset() {
 	*x = ReadyToStartUpdate{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_lumbay2_proto_msgTypes[23]
+		mi := &file_lumbay2_proto_msgTypes[31]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1398,7 +2022,7 @@ func (x *ReadyToStartUpdate) String() string {
 func (*ReadyToStartUpdate) ProtoMessage() {}
 
 func (x *ReadyToStartUpdate) ProtoReflect() protoreflect.Message {
-	mi := &file_lumbay2_proto_msgTypes[23]
+	mi := &file_lumbay2_proto_msgTypes[31]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1411,7 +2035,7 @@ func (x *ReadyToStartUpdate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReadyToStartUpdate.ProtoReflect.Descriptor instead.
 func (*ReadyToStartUpdate) Descriptor() ([]byte, []int) {
-	return file_lumbay2_proto_rawDescGZIP(), []int{23}
+	return file_lumbay2_proto_rawDescGZIP(), []int{31}
 }
 
 type GameCodeGeneratedUpdate struct {
@@ -1425,7 +2049,7 @@ type GameCodeGeneratedUpdate struct {
 func (x *GameCodeGeneratedUpdate) Reset() {
 	*x = GameCodeGeneratedUpdate{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_lumbay2_proto_msgTypes[24]
+		mi := &file_lumbay2_proto_msgTypes[32]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1438,7 +2062,7 @@ func (x *GameCodeGeneratedUpdate) String() string {
 func (*GameCodeGeneratedUpdate) ProtoMessage() {}
 
 func (x *GameCodeGeneratedUpdate) ProtoReflect() protoreflect.Message {
-	mi := &file_lumbay2_proto_msgTypes[24]
+	mi := &file_lumbay2_proto_msgTypes[32]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1451,7 +2075,7 @@ func (x *GameCodeGeneratedUpdate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GameCodeGeneratedUpdate.ProtoReflect.Descriptor instead.
 func (*GameCodeGeneratedUpdate) Descriptor() ([]byte, []int) {
-	return file_lumbay2_proto_rawDescGZIP(), []int{24}
+	return file_lumbay2_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *GameCodeGeneratedUpdate) GetGameCode() string {
@@ -1470,7 +2094,7 @@ type YouQuitTheGameUpdate struct {
 func (x *YouQuitTheGameUpdate) Reset() {
 	*x = YouQuitTheGameUpdate{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_lumbay2_proto_msgTypes[25]
+		mi := &file_lumbay2_proto_msgTypes[33]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1483,7 +2107,7 @@ func (x *YouQuitTheGameUpdate) String() string {
 func (*YouQuitTheGameUpdate) ProtoMessage() {}
 
 func (x *YouQuitTheGameUpdate) ProtoReflect() protoreflect.Message {
-	mi := &file_lumbay2_proto_msgTypes[25]
+	mi := &file_lumbay2_proto_msgTypes[33]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1496,7 +2120,7 @@ func (x *YouQuitTheGameUpdate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use YouQuitTheGameUpdate.ProtoReflect.Descriptor instead.
 func (*YouQuitTheGameUpdate) Descriptor() ([]byte, []int) {
-	return file_lumbay2_proto_rawDescGZIP(), []int{25}
+	return file_lumbay2_proto_rawDescGZIP(), []int{33}
 }
 
 type GameStartedUpdate struct {
@@ -1508,7 +2132,7 @@ type GameStartedUpdate struct {
 func (x *GameStartedUpdate) Reset() {
 	*x = GameStartedUpdate{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_lumbay2_proto_msgTypes[26]
+		mi := &file_lumbay2_proto_msgTypes[34]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1521,7 +2145,7 @@ func (x *GameStartedUpdate) String() string {
 func (*GameStartedUpdate) ProtoMessage() {}
 
 func (x *GameStartedUpdate) ProtoReflect() protoreflect.Message {
-	mi := &file_lumbay2_proto_msgTypes[26]
+	mi := &file_lumbay2_proto_msgTypes[34]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1534,14 +2158,242 @@ func (x *GameStartedUpdate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GameStartedUpdate.ProtoReflect.Descriptor instead.
 func (*GameStartedUpdate) Descriptor() ([]byte, []int) {
-	return file_lumbay2_proto_rawDescGZIP(), []int{26}
+	return file_lumbay2_proto_rawDescGZIP(), []int{34}
+}
+
+type WorldUpdate struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	World *World `protobuf:"bytes,1,opt,name=world,proto3" json:"world,omitempty"`
+}
+
+func (x *WorldUpdate) Reset() {
+	*x = WorldUpdate{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_lumbay2_proto_msgTypes[35]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *WorldUpdate) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WorldUpdate) ProtoMessage() {}
+
+func (x *WorldUpdate) ProtoReflect() protoreflect.Message {
+	mi := &file_lumbay2_proto_msgTypes[35]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WorldUpdate.ProtoReflect.Descriptor instead.
+func (*WorldUpdate) Descriptor() ([]byte, []int) {
+	return file_lumbay2_proto_rawDescGZIP(), []int{35}
+}
+
+func (x *WorldUpdate) GetWorld() *World {
+	if x != nil {
+		return x.World
+	}
+	return nil
+}
+
+type WorldStatusUpdate struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	WorldId string       `protobuf:"bytes,1,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"`
+	Status  *WorldStatus `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+}
+
+func (x *WorldStatusUpdate) Reset() {
+	*x = WorldStatusUpdate{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_lumbay2_proto_msgTypes[36]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *WorldStatusUpdate) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WorldStatusUpdate) ProtoMessage() {}
+
+func (x *WorldStatusUpdate) ProtoReflect() protoreflect.Message {
+	mi := &file_lumbay2_proto_msgTypes[36]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WorldStatusUpdate.ProtoReflect.Descriptor instead.
+func (*WorldStatusUpdate) Descriptor() ([]byte, []int) {
+	return file_lumbay2_proto_rawDescGZIP(), []int{36}
+}
+
+func (x *WorldStatusUpdate) GetWorldId() string {
+	if x != nil {
+		return x.WorldId
+	}
+	return ""
+}
+
+func (x *WorldStatusUpdate) GetStatus() *WorldStatus {
+	if x != nil {
+		return x.Status
+	}
+	return nil
+}
+
+type WorldRegionStatusUpdate struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	WorldId       string       `protobuf:"bytes,1,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"`
+	WorldRegionId string       `protobuf:"bytes,2,opt,name=world_region_id,json=worldRegionId,proto3" json:"world_region_id,omitempty"`
+	Status        *WorldStatus `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
+}
+
+func (x *WorldRegionStatusUpdate) Reset() {
+	*x = WorldRegionStatusUpdate{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_lumbay2_proto_msgTypes[37]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *WorldRegionStatusUpdate) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WorldRegionStatusUpdate) ProtoMessage() {}
+
+func (x *WorldRegionStatusUpdate) ProtoReflect() protoreflect.Message {
+	mi := &file_lumbay2_proto_msgTypes[37]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WorldRegionStatusUpdate.ProtoReflect.Descriptor instead.
+func (*WorldRegionStatusUpdate) Descriptor() ([]byte, []int) {
+	return file_lumbay2_proto_rawDescGZIP(), []int{37}
+}
+
+func (x *WorldRegionStatusUpdate) GetWorldId() string {
+	if x != nil {
+		return x.WorldId
+	}
+	return ""
+}
+
+func (x *WorldRegionStatusUpdate) GetWorldRegionId() string {
+	if x != nil {
+		return x.WorldRegionId
+	}
+	return ""
+}
+
+func (x *WorldRegionStatusUpdate) GetStatus() *WorldStatus {
+	if x != nil {
+		return x.Status
+	}
+	return nil
+}
+
+type WorldObjectUpdate struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	WorldId       string       `protobuf:"bytes,1,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"`
+	WorldRegionId string       `protobuf:"bytes,2,opt,name=world_region_id,json=worldRegionId,proto3" json:"world_region_id,omitempty"`
+	WorldObject   *WorldObject `protobuf:"bytes,3,opt,name=world_object,json=worldObject,proto3" json:"world_object,omitempty"`
+}
+
+func (x *WorldObjectUpdate) Reset() {
+	*x = WorldObjectUpdate{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_lumbay2_proto_msgTypes[38]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *WorldObjectUpdate) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WorldObjectUpdate) ProtoMessage() {}
+
+func (x *WorldObjectUpdate) ProtoReflect() protoreflect.Message {
+	mi := &file_lumbay2_proto_msgTypes[38]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WorldObjectUpdate.ProtoReflect.Descriptor instead.
+func (*WorldObjectUpdate) Descriptor() ([]byte, []int) {
+	return file_lumbay2_proto_rawDescGZIP(), []int{38}
+}
+
+func (x *WorldObjectUpdate) GetWorldId() string {
+	if x != nil {
+		return x.WorldId
+	}
+	return ""
+}
+
+func (x *WorldObjectUpdate) GetWorldRegionId() string {
+	if x != nil {
+		return x.WorldRegionId
+	}
+	return ""
+}
+
+func (x *WorldObjectUpdate) GetWorldObject() *WorldObject {
+	if x != nil {
+		return x.WorldObject
+	}
+	return nil
 }
 
 var File_lumbay2_proto protoreflect.FileDescriptor
 
 var file_lumbay2_proto_rawDesc = []byte{
 	0x0a, 0x0d, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12,
-	0x09, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x22, 0xfa, 0x04, 0x0a, 0x06, 0x55,
+	0x09, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x22, 0xba, 0x07, 0x0a, 0x06, 0x55,
 	0x70, 0x64, 0x61, 0x74, 0x65, 0x12, 0x27, 0x0a, 0x0f, 0x73, 0x65, 0x71, 0x75, 0x65, 0x6e, 0x63,
 	0x65, 0x5f, 0x6e, 0x75, 0x6d, 0x62, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0e,
 	0x73, 0x65, 0x71, 0x75, 0x65, 0x6e, 0x63, 0x65, 0x4e, 0x75, 0x6d, 0x62, 0x65, 0x72, 0x12, 0x25,
@@ -1580,8 +2432,28 @@ var file_lumbay2_proto_rawDesc = []byte{
 	0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x18, 0x08, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1c, 0x2e, 0x6c,
 	0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x47, 0x61, 0x6d, 0x65, 0x53, 0x74, 0x61,
 	0x72, 0x74, 0x65, 0x64, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x48, 0x00, 0x52, 0x11, 0x67, 0x61,
-	0x6d, 0x65, 0x53, 0x74, 0x61, 0x72, 0x74, 0x65, 0x64, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x42,
-	0x06, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65, 0x22, 0xe8, 0x04, 0x0a, 0x07, 0x52, 0x65, 0x71, 0x75,
+	0x6d, 0x65, 0x53, 0x74, 0x61, 0x72, 0x74, 0x65, 0x64, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x12,
+	0x3b, 0x0a, 0x0c, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x5f, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x18,
+	0x09, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x16, 0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73,
+	0x76, 0x2e, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x48, 0x00, 0x52,
+	0x0b, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x12, 0x4e, 0x0a, 0x13,
+	0x77, 0x6f, 0x72, 0x6c, 0x64, 0x5f, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x5f, 0x75, 0x70, 0x64,
+	0x61, 0x74, 0x65, 0x18, 0x0a, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1c, 0x2e, 0x6c, 0x75, 0x6d, 0x62,
+	0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x53, 0x74, 0x61, 0x74, 0x75,
+	0x73, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x48, 0x00, 0x52, 0x11, 0x77, 0x6f, 0x72, 0x6c, 0x64,
+	0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x12, 0x61, 0x0a, 0x1a,
+	0x77, 0x6f, 0x72, 0x6c, 0x64, 0x5f, 0x72, 0x65, 0x67, 0x69, 0x6f, 0x6e, 0x5f, 0x73, 0x74, 0x61,
+	0x74, 0x75, 0x73, 0x5f, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x18, 0x0b, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x22, 0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x57, 0x6f, 0x72,
+	0x6c, 0x64, 0x52, 0x65, 0x67, 0x69, 0x6f, 0x6e, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x55, 0x70,
+	0x64, 0x61, 0x74, 0x65, 0x48, 0x00, 0x52, 0x17, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x52, 0x65, 0x67,
+	0x69, 0x6f, 0x6e, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x12,
+	0x4e, 0x0a, 0x13, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x5f, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x5f,
+	0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x18, 0x0c, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1c, 0x2e, 0x6c,
+	0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x4f, 0x62,
+	0x6a, 0x65, 0x63, 0x74, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x48, 0x00, 0x52, 0x11, 0x77, 0x6f,
+	0x72, 0x6c, 0x64, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x42,
+	0x06, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65, 0x22, 0xcb, 0x05, 0x0a, 0x07, 0x52, 0x65, 0x71, 0x75,
 	0x65, 0x73, 0x74, 0x12, 0x5e, 0x0a, 0x19, 0x61, 0x63, 0x71, 0x75, 0x69, 0x72, 0x65, 0x5f, 0x63,
 	0x6c, 0x69, 0x65, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x5f, 0x72, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
 	0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x21, 0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32,
@@ -1619,107 +2491,207 @@ var file_lumbay2_proto_rawDesc = []byte{
 	0x65, 0x73, 0x74, 0x18, 0x07, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1b, 0x2e, 0x6c, 0x75, 0x6d, 0x62,
 	0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x53, 0x74, 0x61, 0x72, 0x74, 0x47, 0x61, 0x6d, 0x65, 0x52,
 	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x48, 0x00, 0x52, 0x10, 0x73, 0x74, 0x61, 0x72, 0x74, 0x47,
-	0x61, 0x6d, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x42, 0x06, 0x0a, 0x04, 0x74, 0x79,
-	0x70, 0x65, 0x22, 0xbc, 0x04, 0x0a, 0x05, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x58, 0x0a, 0x17,
-	0x61, 0x63, 0x71, 0x75, 0x69, 0x72, 0x65, 0x5f, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x5f, 0x69,
-	0x64, 0x5f, 0x72, 0x65, 0x70, 0x6c, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1f, 0x2e,
-	0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x41, 0x63, 0x71, 0x75, 0x69, 0x72,
-	0x65, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x49, 0x64, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x48, 0x00,
-	0x52, 0x14, 0x61, 0x63, 0x71, 0x75, 0x69, 0x72, 0x65, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x49,
-	0x64, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x5b, 0x0a, 0x18, 0x61, 0x63, 0x71, 0x75, 0x69, 0x72,
-	0x65, 0x5f, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x5f, 0x6b, 0x65, 0x79, 0x5f, 0x72, 0x65, 0x70,
-	0x6c, 0x79, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x20, 0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61,
-	0x79, 0x32, 0x73, 0x76, 0x2e, 0x41, 0x63, 0x71, 0x75, 0x69, 0x72, 0x65, 0x50, 0x75, 0x62, 0x6c,
-	0x69, 0x63, 0x4b, 0x65, 0x79, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x48, 0x00, 0x52, 0x15, 0x61, 0x63,
-	0x71, 0x75, 0x69, 0x72, 0x65, 0x50, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x4b, 0x65, 0x79, 0x52, 0x65,
-	0x70, 0x6c, 0x79, 0x12, 0x48, 0x0a, 0x11, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x5f, 0x67, 0x61,
-	0x6d, 0x65, 0x5f, 0x72, 0x65, 0x70, 0x6c, 0x79, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a,
-	0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74,
-	0x65, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x48, 0x00, 0x52, 0x0f, 0x63, 0x72,
-	0x65, 0x61, 0x74, 0x65, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x5b, 0x0a,
-	0x18, 0x67, 0x65, 0x6e, 0x65, 0x72, 0x61, 0x74, 0x65, 0x5f, 0x67, 0x61, 0x6d, 0x65, 0x5f, 0x63,
-	0x6f, 0x64, 0x65, 0x5f, 0x72, 0x65, 0x70, 0x6c, 0x79, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32,
-	0x20, 0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x47, 0x65, 0x6e, 0x65,
-	0x72, 0x61, 0x74, 0x65, 0x47, 0x61, 0x6d, 0x65, 0x43, 0x6f, 0x64, 0x65, 0x52, 0x65, 0x70, 0x6c,
-	0x79, 0x48, 0x00, 0x52, 0x15, 0x67, 0x65, 0x6e, 0x65, 0x72, 0x61, 0x74, 0x65, 0x47, 0x61, 0x6d,
-	0x65, 0x43, 0x6f, 0x64, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x42, 0x0a, 0x0f, 0x6a, 0x6f,
-	0x69, 0x6e, 0x5f, 0x67, 0x61, 0x6d, 0x65, 0x5f, 0x72, 0x65, 0x70, 0x6c, 0x79, 0x18, 0x05, 0x20,
-	0x01, 0x28, 0x0b, 0x32, 0x18, 0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e,
-	0x4a, 0x6f, 0x69, 0x6e, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x48, 0x00, 0x52,
-	0x0d, 0x6a, 0x6f, 0x69, 0x6e, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x42,
-	0x0a, 0x0f, 0x71, 0x75, 0x69, 0x74, 0x5f, 0x67, 0x61, 0x6d, 0x65, 0x5f, 0x72, 0x65, 0x70, 0x6c,
-	0x79, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x18, 0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79,
-	0x32, 0x73, 0x76, 0x2e, 0x51, 0x75, 0x69, 0x74, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x70, 0x6c,
-	0x79, 0x48, 0x00, 0x52, 0x0d, 0x71, 0x75, 0x69, 0x74, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x70,
-	0x6c, 0x79, 0x12, 0x45, 0x0a, 0x10, 0x73, 0x74, 0x61, 0x72, 0x74, 0x5f, 0x67, 0x61, 0x6d, 0x65,
-	0x5f, 0x72, 0x65, 0x70, 0x6c, 0x79, 0x18, 0x07, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x6c,
-	0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x53, 0x74, 0x61, 0x72, 0x74, 0x47, 0x61,
-	0x6d, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x48, 0x00, 0x52, 0x0e, 0x73, 0x74, 0x61, 0x72, 0x74,
-	0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x42, 0x06, 0x0a, 0x04, 0x74, 0x79, 0x70,
-	0x65, 0x22, 0x07, 0x0a, 0x05, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x18, 0x0a, 0x16, 0x41, 0x63,
-	0x71, 0x75, 0x69, 0x72, 0x65, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x49, 0x64, 0x52, 0x65, 0x71,
-	0x75, 0x65, 0x73, 0x74, 0x22, 0x2d, 0x0a, 0x17, 0x41, 0x63, 0x71, 0x75, 0x69, 0x72, 0x65, 0x50,
-	0x75, 0x62, 0x6c, 0x69, 0x63, 0x4b, 0x65, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
-	0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e,
-	0x61, 0x6d, 0x65, 0x22, 0x33, 0x0a, 0x14, 0x41, 0x63, 0x71, 0x75, 0x69, 0x72, 0x65, 0x43, 0x6c,
-	0x69, 0x65, 0x6e, 0x74, 0x49, 0x64, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x1b, 0x0a, 0x09, 0x63,
-	0x6c, 0x69, 0x65, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08,
-	0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x49, 0x64, 0x22, 0x36, 0x0a, 0x15, 0x41, 0x63, 0x71, 0x75,
-	0x69, 0x72, 0x65, 0x50, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x4b, 0x65, 0x79, 0x52, 0x65, 0x70, 0x6c,
-	0x79, 0x12, 0x1d, 0x0a, 0x0a, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x5f, 0x6b, 0x65, 0x79, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x4b, 0x65, 0x79,
-	0x22, 0x13, 0x0a, 0x11, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x11, 0x0a, 0x0f, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x47,
-	0x61, 0x6d, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x19, 0x0a, 0x17, 0x47, 0x65, 0x6e, 0x65,
-	0x72, 0x61, 0x74, 0x65, 0x47, 0x61, 0x6d, 0x65, 0x43, 0x6f, 0x64, 0x65, 0x52, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x22, 0x17, 0x0a, 0x15, 0x47, 0x65, 0x6e, 0x65, 0x72, 0x61, 0x74, 0x65, 0x47,
-	0x61, 0x6d, 0x65, 0x43, 0x6f, 0x64, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x2d, 0x0a, 0x0f,
-	0x4a, 0x6f, 0x69, 0x6e, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
-	0x1a, 0x0a, 0x08, 0x67, 0x61, 0x6d, 0x65, 0x43, 0x6f, 0x64, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x08, 0x67, 0x61, 0x6d, 0x65, 0x43, 0x6f, 0x64, 0x65, 0x22, 0x0f, 0x0a, 0x0d, 0x4a,
-	0x6f, 0x69, 0x6e, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x11, 0x0a, 0x0f,
-	0x51, 0x75, 0x69, 0x74, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22,
-	0x0f, 0x0a, 0x0d, 0x51, 0x75, 0x69, 0x74, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x79,
-	0x22, 0x12, 0x0a, 0x10, 0x53, 0x74, 0x61, 0x72, 0x74, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x71,
-	0x75, 0x65, 0x73, 0x74, 0x22, 0x10, 0x0a, 0x0e, 0x53, 0x74, 0x61, 0x72, 0x74, 0x47, 0x61, 0x6d,
-	0x65, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x79, 0x0a, 0x04, 0x47, 0x61, 0x6d, 0x65, 0x12, 0x0e,
-	0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x18,
-	0x0a, 0x07, 0x70, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x31, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x07, 0x70, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x31, 0x12, 0x18, 0x0a, 0x07, 0x70, 0x6c, 0x61, 0x79,
-	0x65, 0x72, 0x32, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x70, 0x6c, 0x61, 0x79, 0x65,
-	0x72, 0x32, 0x12, 0x2d, 0x0a, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x18, 0x04, 0x20, 0x01,
-	0x28, 0x0e, 0x32, 0x15, 0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x47,
-	0x61, 0x6d, 0x65, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75,
-	0x73, 0x22, 0x2c, 0x0a, 0x06, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69,
-	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x73,
-	0x61, 0x6c, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x73, 0x61, 0x6c, 0x74, 0x22,
-	0x06, 0x0a, 0x04, 0x50, 0x69, 0x6e, 0x67, 0x22, 0x14, 0x0a, 0x12, 0x59, 0x6f, 0x75, 0x41, 0x72,
-	0x65, 0x49, 0x6e, 0x47, 0x61, 0x6d, 0x65, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x22, 0x1d, 0x0a,
-	0x1b, 0x57, 0x61, 0x69, 0x74, 0x69, 0x6e, 0x67, 0x46, 0x6f, 0x72, 0x4f, 0x74, 0x68, 0x65, 0x72,
-	0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x22, 0x14, 0x0a, 0x12,
-	0x52, 0x65, 0x61, 0x64, 0x79, 0x54, 0x6f, 0x53, 0x74, 0x61, 0x72, 0x74, 0x55, 0x70, 0x64, 0x61,
-	0x74, 0x65, 0x22, 0x36, 0x0a, 0x17, 0x47, 0x61, 0x6d, 0x65, 0x43, 0x6f, 0x64, 0x65, 0x47, 0x65,
-	0x6e, 0x65, 0x72, 0x61, 0x74, 0x65, 0x64, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x12, 0x1b, 0x0a,
-	0x09, 0x67, 0x61, 0x6d, 0x65, 0x5f, 0x63, 0x6f, 0x64, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x08, 0x67, 0x61, 0x6d, 0x65, 0x43, 0x6f, 0x64, 0x65, 0x22, 0x16, 0x0a, 0x14, 0x59, 0x6f,
-	0x75, 0x51, 0x75, 0x69, 0x74, 0x54, 0x68, 0x65, 0x47, 0x61, 0x6d, 0x65, 0x55, 0x70, 0x64, 0x61,
-	0x74, 0x65, 0x22, 0x13, 0x0a, 0x11, 0x47, 0x61, 0x6d, 0x65, 0x53, 0x74, 0x61, 0x72, 0x74, 0x65,
-	0x64, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x2a, 0x55, 0x0a, 0x0a, 0x47, 0x61, 0x6d, 0x65, 0x53,
-	0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x08, 0x0a, 0x04, 0x4e, 0x4f, 0x4e, 0x45, 0x10, 0x00, 0x12,
-	0x1c, 0x0a, 0x18, 0x57, 0x41, 0x49, 0x54, 0x49, 0x4e, 0x47, 0x5f, 0x46, 0x4f, 0x52, 0x5f, 0x4f,
-	0x54, 0x48, 0x45, 0x52, 0x5f, 0x50, 0x4c, 0x41, 0x59, 0x45, 0x52, 0x10, 0x01, 0x12, 0x12, 0x0a,
-	0x0e, 0x52, 0x45, 0x41, 0x44, 0x59, 0x5f, 0x54, 0x4f, 0x5f, 0x53, 0x54, 0x41, 0x52, 0x54, 0x10,
-	0x02, 0x12, 0x0b, 0x0a, 0x07, 0x53, 0x54, 0x41, 0x52, 0x54, 0x45, 0x44, 0x10, 0x03, 0x32, 0x7b,
-	0x0a, 0x0c, 0x4c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x4c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x12, 0x35,
-	0x0a, 0x0b, 0x53, 0x65, 0x6e, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x12, 0x2e,
-	0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x1a, 0x10, 0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x52, 0x65,
-	0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x34, 0x0a, 0x09, 0x53, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69,
-	0x62, 0x65, 0x12, 0x10, 0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x45,
-	0x6d, 0x70, 0x74, 0x79, 0x1a, 0x11, 0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76,
-	0x2e, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x22, 0x00, 0x30, 0x01, 0x42, 0x10, 0x5a, 0x0e, 0x6c,
-	0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2f, 0x6d, 0x61, 0x69, 0x6e, 0x62, 0x06, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x61, 0x6d, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x61, 0x0a, 0x1a, 0x61, 0x6d,
+	0x65, 0x6e, 0x64, 0x5f, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x5f, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74,
+	0x5f, 0x72, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x18, 0x08, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x22,
+	0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x41, 0x6d, 0x65, 0x6e, 0x64,
+	0x57, 0x6f, 0x72, 0x6c, 0x64, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x48, 0x00, 0x52, 0x17, 0x61, 0x6d, 0x65, 0x6e, 0x64, 0x57, 0x6f, 0x72, 0x6c, 0x64,
+	0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x42, 0x06, 0x0a,
+	0x04, 0x74, 0x79, 0x70, 0x65, 0x22, 0x99, 0x05, 0x0a, 0x05, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12,
+	0x58, 0x0a, 0x17, 0x61, 0x63, 0x71, 0x75, 0x69, 0x72, 0x65, 0x5f, 0x63, 0x6c, 0x69, 0x65, 0x6e,
+	0x74, 0x5f, 0x69, 0x64, 0x5f, 0x72, 0x65, 0x70, 0x6c, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x1f, 0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x41, 0x63, 0x71,
+	0x75, 0x69, 0x72, 0x65, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x49, 0x64, 0x52, 0x65, 0x70, 0x6c,
+	0x79, 0x48, 0x00, 0x52, 0x14, 0x61, 0x63, 0x71, 0x75, 0x69, 0x72, 0x65, 0x43, 0x6c, 0x69, 0x65,
+	0x6e, 0x74, 0x49, 0x64, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x5b, 0x0a, 0x18, 0x61, 0x63, 0x71,
+	0x75, 0x69, 0x72, 0x65, 0x5f, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x5f, 0x6b, 0x65, 0x79, 0x5f,
+	0x72, 0x65, 0x70, 0x6c, 0x79, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x20, 0x2e, 0x6c, 0x75,
+	0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x41, 0x63, 0x71, 0x75, 0x69, 0x72, 0x65, 0x50,
+	0x75, 0x62, 0x6c, 0x69, 0x63, 0x4b, 0x65, 0x79, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x48, 0x00, 0x52,
+	0x15, 0x61, 0x63, 0x71, 0x75, 0x69, 0x72, 0x65, 0x50, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x4b, 0x65,
+	0x79, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x48, 0x0a, 0x11, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65,
+	0x5f, 0x67, 0x61, 0x6d, 0x65, 0x5f, 0x72, 0x65, 0x70, 0x6c, 0x79, 0x18, 0x03, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x1a, 0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x43, 0x72,
+	0x65, 0x61, 0x74, 0x65, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x48, 0x00, 0x52,
+	0x0f, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x79,
+	0x12, 0x5b, 0x0a, 0x18, 0x67, 0x65, 0x6e, 0x65, 0x72, 0x61, 0x74, 0x65, 0x5f, 0x67, 0x61, 0x6d,
+	0x65, 0x5f, 0x63, 0x6f, 0x64, 0x65, 0x5f, 0x72, 0x65, 0x70, 0x6c, 0x79, 0x18, 0x04, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x20, 0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x47,
+	0x65, 0x6e, 0x65, 0x72, 0x61, 0x74, 0x65, 0x47, 0x61, 0x6d, 0x65, 0x43, 0x6f, 0x64, 0x65, 0x52,
+	0x65, 0x70, 0x6c, 0x79, 0x48, 0x00, 0x52, 0x15, 0x67, 0x65, 0x6e, 0x65, 0x72, 0x61, 0x74, 0x65,
+	0x47, 0x61, 0x6d, 0x65, 0x43, 0x6f, 0x64, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x42, 0x0a,
+	0x0f, 0x6a, 0x6f, 0x69, 0x6e, 0x5f, 0x67, 0x61, 0x6d, 0x65, 0x5f, 0x72, 0x65, 0x70, 0x6c, 0x79,
+	0x18, 0x05, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x18, 0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32,
+	0x73, 0x76, 0x2e, 0x4a, 0x6f, 0x69, 0x6e, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x79,
+	0x48, 0x00, 0x52, 0x0d, 0x6a, 0x6f, 0x69, 0x6e, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x70, 0x6c,
+	0x79, 0x12, 0x42, 0x0a, 0x0f, 0x71, 0x75, 0x69, 0x74, 0x5f, 0x67, 0x61, 0x6d, 0x65, 0x5f, 0x72,
+	0x65, 0x70, 0x6c, 0x79, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x18, 0x2e, 0x6c, 0x75, 0x6d,
+	0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x51, 0x75, 0x69, 0x74, 0x47, 0x61, 0x6d, 0x65, 0x52,
+	0x65, 0x70, 0x6c, 0x79, 0x48, 0x00, 0x52, 0x0d, 0x71, 0x75, 0x69, 0x74, 0x47, 0x61, 0x6d, 0x65,
+	0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x45, 0x0a, 0x10, 0x73, 0x74, 0x61, 0x72, 0x74, 0x5f, 0x67,
+	0x61, 0x6d, 0x65, 0x5f, 0x72, 0x65, 0x70, 0x6c, 0x79, 0x18, 0x07, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x19, 0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x53, 0x74, 0x61, 0x72,
+	0x74, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x48, 0x00, 0x52, 0x0e, 0x73, 0x74,
+	0x61, 0x72, 0x74, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x5b, 0x0a, 0x18,
+	0x61, 0x6d, 0x65, 0x6e, 0x64, 0x5f, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x5f, 0x6f, 0x62, 0x6a, 0x65,
+	0x63, 0x74, 0x5f, 0x72, 0x65, 0x70, 0x6c, 0x79, 0x18, 0x08, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x20,
+	0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x41, 0x6d, 0x65, 0x6e, 0x64,
+	0x57, 0x6f, 0x72, 0x6c, 0x64, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x52, 0x65, 0x70, 0x6c, 0x79,
+	0x48, 0x00, 0x52, 0x15, 0x61, 0x6d, 0x65, 0x6e, 0x64, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x4f, 0x62,
+	0x6a, 0x65, 0x63, 0x74, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x42, 0x06, 0x0a, 0x04, 0x74, 0x79, 0x70,
+	0x65, 0x22, 0x5c, 0x0a, 0x0b, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73,
+	0x12, 0x45, 0x0a, 0x10, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x5f, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73,
+	0x5f, 0x33, 0x78, 0x33, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x19, 0x2e, 0x6c, 0x75, 0x6d,
+	0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x53, 0x74, 0x61, 0x74,
+	0x75, 0x73, 0x33, 0x78, 0x33, 0x48, 0x00, 0x52, 0x0e, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x53, 0x74,
+	0x61, 0x74, 0x75, 0x73, 0x33, 0x78, 0x33, 0x42, 0x06, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65, 0x22,
+	0x07, 0x0a, 0x05, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x18, 0x0a, 0x16, 0x41, 0x63, 0x71, 0x75,
+	0x69, 0x72, 0x65, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x49, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x22, 0x2d, 0x0a, 0x17, 0x41, 0x63, 0x71, 0x75, 0x69, 0x72, 0x65, 0x50, 0x75, 0x62,
+	0x6c, 0x69, 0x63, 0x4b, 0x65, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x12, 0x0a,
+	0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d,
+	0x65, 0x22, 0x33, 0x0a, 0x14, 0x41, 0x63, 0x71, 0x75, 0x69, 0x72, 0x65, 0x43, 0x6c, 0x69, 0x65,
+	0x6e, 0x74, 0x49, 0x64, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x1b, 0x0a, 0x09, 0x63, 0x6c, 0x69,
+	0x65, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x63, 0x6c,
+	0x69, 0x65, 0x6e, 0x74, 0x49, 0x64, 0x22, 0x36, 0x0a, 0x15, 0x41, 0x63, 0x71, 0x75, 0x69, 0x72,
+	0x65, 0x50, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x4b, 0x65, 0x79, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12,
+	0x1d, 0x0a, 0x0a, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x5f, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x09, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x4b, 0x65, 0x79, 0x22, 0x13,
+	0x0a, 0x11, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x22, 0x11, 0x0a, 0x0f, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x47, 0x61, 0x6d,
+	0x65, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x19, 0x0a, 0x17, 0x47, 0x65, 0x6e, 0x65, 0x72, 0x61,
+	0x74, 0x65, 0x47, 0x61, 0x6d, 0x65, 0x43, 0x6f, 0x64, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x22, 0x17, 0x0a, 0x15, 0x47, 0x65, 0x6e, 0x65, 0x72, 0x61, 0x74, 0x65, 0x47, 0x61, 0x6d,
+	0x65, 0x43, 0x6f, 0x64, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x2d, 0x0a, 0x0f, 0x4a, 0x6f,
+	0x69, 0x6e, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1a, 0x0a,
+	0x08, 0x67, 0x61, 0x6d, 0x65, 0x43, 0x6f, 0x64, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x08, 0x67, 0x61, 0x6d, 0x65, 0x43, 0x6f, 0x64, 0x65, 0x22, 0x0f, 0x0a, 0x0d, 0x4a, 0x6f, 0x69,
+	0x6e, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x11, 0x0a, 0x0f, 0x51, 0x75,
+	0x69, 0x74, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x0f, 0x0a,
+	0x0d, 0x51, 0x75, 0x69, 0x74, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x12,
+	0x0a, 0x10, 0x53, 0x74, 0x61, 0x72, 0x74, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x22, 0x10, 0x0a, 0x0e, 0x53, 0x74, 0x61, 0x72, 0x74, 0x47, 0x61, 0x6d, 0x65, 0x52,
+	0x65, 0x70, 0x6c, 0x79, 0x22, 0x97, 0x01, 0x0a, 0x17, 0x41, 0x6d, 0x65, 0x6e, 0x64, 0x57, 0x6f,
+	0x72, 0x6c, 0x64, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x12, 0x19, 0x0a, 0x08, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x07, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x49, 0x64, 0x12, 0x26, 0x0a, 0x0f, 0x77,
+	0x6f, 0x72, 0x6c, 0x64, 0x5f, 0x72, 0x65, 0x67, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x0d, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x52, 0x65, 0x67, 0x69, 0x6f,
+	0x6e, 0x49, 0x64, 0x12, 0x39, 0x0a, 0x0c, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x5f, 0x6f, 0x62, 0x6a,
+	0x65, 0x63, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x16, 0x2e, 0x6c, 0x75, 0x6d, 0x62,
+	0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x4f, 0x62, 0x6a, 0x65, 0x63,
+	0x74, 0x52, 0x0b, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x22, 0x17,
+	0x0a, 0x15, 0x41, 0x6d, 0x65, 0x6e, 0x64, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x4f, 0x62, 0x6a, 0x65,
+	0x63, 0x74, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x79, 0x0a, 0x04, 0x47, 0x61, 0x6d, 0x65, 0x12,
+	0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12,
+	0x18, 0x0a, 0x07, 0x70, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x31, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x07, 0x70, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x31, 0x12, 0x18, 0x0a, 0x07, 0x70, 0x6c, 0x61,
+	0x79, 0x65, 0x72, 0x32, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x70, 0x6c, 0x61, 0x79,
+	0x65, 0x72, 0x32, 0x12, 0x2d, 0x0a, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x18, 0x04, 0x20,
+	0x01, 0x28, 0x0e, 0x32, 0x15, 0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e,
+	0x47, 0x61, 0x6d, 0x65, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x06, 0x73, 0x74, 0x61, 0x74,
+	0x75, 0x73, 0x22, 0x2c, 0x0a, 0x06, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x12, 0x0e, 0x0a, 0x02,
+	0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x12, 0x0a, 0x04,
+	0x73, 0x61, 0x6c, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x73, 0x61, 0x6c, 0x74,
+	0x22, 0x9e, 0x01, 0x0a, 0x05, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x2e, 0x0a, 0x06, 0x73, 0x74,
+	0x61, 0x74, 0x75, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x16, 0x2e, 0x6c, 0x75, 0x6d,
+	0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x53, 0x74, 0x61, 0x74,
+	0x75, 0x73, 0x52, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x25, 0x0a, 0x03, 0x6d, 0x61,
+	0x70, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x13, 0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79,
+	0x32, 0x73, 0x76, 0x2e, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x4d, 0x61, 0x70, 0x52, 0x03, 0x6d, 0x61,
+	0x70, 0x12, 0x2e, 0x0a, 0x06, 0x72, 0x65, 0x67, 0x69, 0x6f, 0x6e, 0x18, 0x04, 0x20, 0x03, 0x28,
+	0x0b, 0x32, 0x16, 0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x57, 0x6f,
+	0x72, 0x6c, 0x64, 0x52, 0x65, 0x67, 0x69, 0x6f, 0x6e, 0x52, 0x06, 0x72, 0x65, 0x67, 0x69, 0x6f,
+	0x6e, 0x22, 0xa6, 0x01, 0x0a, 0x0b, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x52, 0x65, 0x67, 0x69, 0x6f,
+	0x6e, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69,
+	0x64, 0x12, 0x2e, 0x0a, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x16, 0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x57, 0x6f,
+	0x72, 0x6c, 0x64, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75,
+	0x73, 0x12, 0x25, 0x0a, 0x03, 0x6d, 0x61, 0x70, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x13,
+	0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x57, 0x6f, 0x72, 0x6c, 0x64,
+	0x4d, 0x61, 0x70, 0x52, 0x03, 0x6d, 0x61, 0x70, 0x12, 0x30, 0x0a, 0x07, 0x6f, 0x62, 0x6a, 0x65,
+	0x63, 0x74, 0x73, 0x18, 0x04, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x16, 0x2e, 0x6c, 0x75, 0x6d, 0x62,
+	0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x4f, 0x62, 0x6a, 0x65, 0x63,
+	0x74, 0x52, 0x07, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x22, 0x48, 0x0a, 0x08, 0x57, 0x6f,
+	0x72, 0x6c, 0x64, 0x4d, 0x61, 0x70, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x16, 0x0a, 0x06, 0x68, 0x65, 0x69, 0x67, 0x68, 0x74,
+	0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x68, 0x65, 0x69, 0x67, 0x68, 0x74, 0x12, 0x14,
+	0x0a, 0x05, 0x77, 0x69, 0x64, 0x74, 0x68, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05, 0x77,
+	0x69, 0x64, 0x74, 0x68, 0x22, 0x2e, 0x0a, 0x10, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x4d, 0x61, 0x70,
+	0x4c, 0x6f, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x0c, 0x0a, 0x01, 0x78, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x03, 0x52, 0x01, 0x78, 0x12, 0x0c, 0x0a, 0x01, 0x79, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x03, 0x52, 0x01, 0x79, 0x22, 0x56, 0x0a, 0x0b, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x4f, 0x62, 0x6a,
+	0x65, 0x63, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x02, 0x69, 0x64, 0x12, 0x37, 0x0a, 0x08, 0x6c, 0x6f, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1b, 0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73,
+	0x76, 0x2e, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x4d, 0x61, 0x70, 0x4c, 0x6f, 0x63, 0x61, 0x74, 0x69,
+	0x6f, 0x6e, 0x52, 0x08, 0x6c, 0x6f, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x06, 0x0a, 0x04,
+	0x50, 0x69, 0x6e, 0x67, 0x22, 0x14, 0x0a, 0x12, 0x59, 0x6f, 0x75, 0x41, 0x72, 0x65, 0x49, 0x6e,
+	0x47, 0x61, 0x6d, 0x65, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x22, 0x1d, 0x0a, 0x1b, 0x57, 0x61,
+	0x69, 0x74, 0x69, 0x6e, 0x67, 0x46, 0x6f, 0x72, 0x4f, 0x74, 0x68, 0x65, 0x72, 0x50, 0x6c, 0x61,
+	0x79, 0x65, 0x72, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x22, 0x14, 0x0a, 0x12, 0x52, 0x65, 0x61,
+	0x64, 0x79, 0x54, 0x6f, 0x53, 0x74, 0x61, 0x72, 0x74, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x22,
+	0x36, 0x0a, 0x17, 0x47, 0x61, 0x6d, 0x65, 0x43, 0x6f, 0x64, 0x65, 0x47, 0x65, 0x6e, 0x65, 0x72,
+	0x61, 0x74, 0x65, 0x64, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x12, 0x1b, 0x0a, 0x09, 0x67, 0x61,
+	0x6d, 0x65, 0x5f, 0x63, 0x6f, 0x64, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x67,
+	0x61, 0x6d, 0x65, 0x43, 0x6f, 0x64, 0x65, 0x22, 0x16, 0x0a, 0x14, 0x59, 0x6f, 0x75, 0x51, 0x75,
+	0x69, 0x74, 0x54, 0x68, 0x65, 0x47, 0x61, 0x6d, 0x65, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x22,
+	0x13, 0x0a, 0x11, 0x47, 0x61, 0x6d, 0x65, 0x53, 0x74, 0x61, 0x72, 0x74, 0x65, 0x64, 0x55, 0x70,
+	0x64, 0x61, 0x74, 0x65, 0x22, 0x35, 0x0a, 0x0b, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x55, 0x70, 0x64,
+	0x61, 0x74, 0x65, 0x12, 0x26, 0x0a, 0x05, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x10, 0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x57,
+	0x6f, 0x72, 0x6c, 0x64, 0x52, 0x05, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x22, 0x5e, 0x0a, 0x11, 0x57,
+	0x6f, 0x72, 0x6c, 0x64, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65,
+	0x12, 0x19, 0x0a, 0x08, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x07, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x49, 0x64, 0x12, 0x2e, 0x0a, 0x06, 0x73,
+	0x74, 0x61, 0x74, 0x75, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x16, 0x2e, 0x6c, 0x75,
+	0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x53, 0x74, 0x61,
+	0x74, 0x75, 0x73, 0x52, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x22, 0x8c, 0x01, 0x0a, 0x17,
+	0x57, 0x6f, 0x72, 0x6c, 0x64, 0x52, 0x65, 0x67, 0x69, 0x6f, 0x6e, 0x53, 0x74, 0x61, 0x74, 0x75,
+	0x73, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x12, 0x19, 0x0a, 0x08, 0x77, 0x6f, 0x72, 0x6c, 0x64,
+	0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x77, 0x6f, 0x72, 0x6c, 0x64,
+	0x49, 0x64, 0x12, 0x26, 0x0a, 0x0f, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x5f, 0x72, 0x65, 0x67, 0x69,
+	0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0d, 0x77, 0x6f, 0x72,
+	0x6c, 0x64, 0x52, 0x65, 0x67, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x12, 0x2e, 0x0a, 0x06, 0x73, 0x74,
+	0x61, 0x74, 0x75, 0x73, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x16, 0x2e, 0x6c, 0x75, 0x6d,
+	0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x53, 0x74, 0x61, 0x74,
+	0x75, 0x73, 0x52, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x22, 0x91, 0x01, 0x0a, 0x11, 0x57,
+	0x6f, 0x72, 0x6c, 0x64, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65,
+	0x12, 0x19, 0x0a, 0x08, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x07, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x49, 0x64, 0x12, 0x26, 0x0a, 0x0f, 0x77,
+	0x6f, 0x72, 0x6c, 0x64, 0x5f, 0x72, 0x65, 0x67, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x0d, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x52, 0x65, 0x67, 0x69, 0x6f,
+	0x6e, 0x49, 0x64, 0x12, 0x39, 0x0a, 0x0c, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x5f, 0x6f, 0x62, 0x6a,
+	0x65, 0x63, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x16, 0x2e, 0x6c, 0x75, 0x6d, 0x62,
+	0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x4f, 0x62, 0x6a, 0x65, 0x63,
+	0x74, 0x52, 0x0b, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x2a, 0x55,
+	0x0a, 0x0a, 0x47, 0x61, 0x6d, 0x65, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x08, 0x0a, 0x04,
+	0x4e, 0x4f, 0x4e, 0x45, 0x10, 0x00, 0x12, 0x1c, 0x0a, 0x18, 0x57, 0x41, 0x49, 0x54, 0x49, 0x4e,
+	0x47, 0x5f, 0x46, 0x4f, 0x52, 0x5f, 0x4f, 0x54, 0x48, 0x45, 0x52, 0x5f, 0x50, 0x4c, 0x41, 0x59,
+	0x45, 0x52, 0x10, 0x01, 0x12, 0x12, 0x0a, 0x0e, 0x52, 0x45, 0x41, 0x44, 0x59, 0x5f, 0x54, 0x4f,
+	0x5f, 0x53, 0x54, 0x41, 0x52, 0x54, 0x10, 0x02, 0x12, 0x0b, 0x0a, 0x07, 0x53, 0x54, 0x41, 0x52,
+	0x54, 0x45, 0x44, 0x10, 0x03, 0x2a, 0x9d, 0x01, 0x0a, 0x0e, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x53,
+	0x74, 0x61, 0x74, 0x75, 0x73, 0x33, 0x78, 0x33, 0x12, 0x11, 0x0a, 0x0d, 0x57, 0x53, 0x33, 0x58,
+	0x33, 0x5f, 0x4e, 0x4f, 0x54, 0x48, 0x49, 0x4e, 0x47, 0x10, 0x00, 0x12, 0x1a, 0x0a, 0x16, 0x57,
+	0x53, 0x33, 0x58, 0x33, 0x5f, 0x50, 0x4c, 0x41, 0x59, 0x45, 0x52, 0x5f, 0x31, 0x5f, 0x54, 0x4f,
+	0x5f, 0x4d, 0x4f, 0x56, 0x45, 0x10, 0x01, 0x12, 0x1a, 0x0a, 0x16, 0x57, 0x53, 0x33, 0x58, 0x33,
+	0x5f, 0x50, 0x4c, 0x41, 0x59, 0x45, 0x52, 0x5f, 0x32, 0x5f, 0x54, 0x4f, 0x5f, 0x4d, 0x4f, 0x56,
+	0x45, 0x10, 0x02, 0x12, 0x17, 0x0a, 0x13, 0x57, 0x53, 0x33, 0x58, 0x33, 0x5f, 0x50, 0x4c, 0x41,
+	0x59, 0x45, 0x52, 0x5f, 0x31, 0x5f, 0x57, 0x49, 0x4e, 0x53, 0x10, 0x03, 0x12, 0x17, 0x0a, 0x13,
+	0x57, 0x53, 0x33, 0x58, 0x33, 0x5f, 0x50, 0x4c, 0x41, 0x59, 0x45, 0x52, 0x5f, 0x32, 0x5f, 0x57,
+	0x49, 0x4e, 0x53, 0x10, 0x04, 0x12, 0x0e, 0x0a, 0x0a, 0x57, 0x53, 0x33, 0x78, 0x33, 0x5f, 0x44,
+	0x52, 0x41, 0x57, 0x10, 0x05, 0x32, 0x7b, 0x0a, 0x0c, 0x4c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x4c,
+	0x75, 0x6d, 0x62, 0x61, 0x79, 0x12, 0x35, 0x0a, 0x0b, 0x53, 0x65, 0x6e, 0x64, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x12, 0x12, 0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76,
+	0x2e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x10, 0x2e, 0x6c, 0x75, 0x6d, 0x62, 0x61,
+	0x79, 0x32, 0x73, 0x76, 0x2e, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x34, 0x0a, 0x09,
+	0x53, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x62, 0x65, 0x12, 0x10, 0x2e, 0x6c, 0x75, 0x6d, 0x62,
+	0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x11, 0x2e, 0x6c, 0x75,
+	0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2e, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x22, 0x00,
+	0x30, 0x01, 0x42, 0x10, 0x5a, 0x0e, 0x6c, 0x75, 0x6d, 0x62, 0x61, 0x79, 0x32, 0x73, 0x76, 0x2f,
+	0x6d, 0x61, 0x69, 0x6e, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1734,70 +2706,102 @@ func file_lumbay2_proto_rawDescGZIP() []byte {
 	return file_lumbay2_proto_rawDescData
 }
 
-var file_lumbay2_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_lumbay2_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
+var file_lumbay2_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_lumbay2_proto_msgTypes = make([]protoimpl.MessageInfo, 39)
 var file_lumbay2_proto_goTypes = []interface{}{
 	(GameStatus)(0),                     // 0: lumbay2sv.GameStatus
-	(*Update)(nil),                      // 1: lumbay2sv.Update
-	(*Request)(nil),                     // 2: lumbay2sv.Request
-	(*Reply)(nil),                       // 3: lumbay2sv.Reply
-	(*Empty)(nil),                       // 4: lumbay2sv.Empty
-	(*AcquireClientIdRequest)(nil),      // 5: lumbay2sv.AcquireClientIdRequest
-	(*AcquirePublicKeyRequest)(nil),     // 6: lumbay2sv.AcquirePublicKeyRequest
-	(*AcquireClientIdReply)(nil),        // 7: lumbay2sv.AcquireClientIdReply
-	(*AcquirePublicKeyReply)(nil),       // 8: lumbay2sv.AcquirePublicKeyReply
-	(*CreateGameRequest)(nil),           // 9: lumbay2sv.CreateGameRequest
-	(*CreateGameReply)(nil),             // 10: lumbay2sv.CreateGameReply
-	(*GenerateGameCodeRequest)(nil),     // 11: lumbay2sv.GenerateGameCodeRequest
-	(*GenerateGameCodeReply)(nil),       // 12: lumbay2sv.GenerateGameCodeReply
-	(*JoinGameRequest)(nil),             // 13: lumbay2sv.JoinGameRequest
-	(*JoinGameReply)(nil),               // 14: lumbay2sv.JoinGameReply
-	(*QuitGameRequest)(nil),             // 15: lumbay2sv.QuitGameRequest
-	(*QuitGameReply)(nil),               // 16: lumbay2sv.QuitGameReply
-	(*StartGameRequest)(nil),            // 17: lumbay2sv.StartGameRequest
-	(*StartGameReply)(nil),              // 18: lumbay2sv.StartGameReply
-	(*Game)(nil),                        // 19: lumbay2sv.Game
-	(*Client)(nil),                      // 20: lumbay2sv.Client
-	(*Ping)(nil),                        // 21: lumbay2sv.Ping
-	(*YouAreInGameUpdate)(nil),          // 22: lumbay2sv.YouAreInGameUpdate
-	(*WaitingForOtherPlayerUpdate)(nil), // 23: lumbay2sv.WaitingForOtherPlayerUpdate
-	(*ReadyToStartUpdate)(nil),          // 24: lumbay2sv.ReadyToStartUpdate
-	(*GameCodeGeneratedUpdate)(nil),     // 25: lumbay2sv.GameCodeGeneratedUpdate
-	(*YouQuitTheGameUpdate)(nil),        // 26: lumbay2sv.YouQuitTheGameUpdate
-	(*GameStartedUpdate)(nil),           // 27: lumbay2sv.GameStartedUpdate
+	(WorldStatus3X3)(0),                 // 1: lumbay2sv.WorldStatus3x3
+	(*Update)(nil),                      // 2: lumbay2sv.Update
+	(*Request)(nil),                     // 3: lumbay2sv.Request
+	(*Reply)(nil),                       // 4: lumbay2sv.Reply
+	(*WorldStatus)(nil),                 // 5: lumbay2sv.WorldStatus
+	(*Empty)(nil),                       // 6: lumbay2sv.Empty
+	(*AcquireClientIdRequest)(nil),      // 7: lumbay2sv.AcquireClientIdRequest
+	(*AcquirePublicKeyRequest)(nil),     // 8: lumbay2sv.AcquirePublicKeyRequest
+	(*AcquireClientIdReply)(nil),        // 9: lumbay2sv.AcquireClientIdReply
+	(*AcquirePublicKeyReply)(nil),       // 10: lumbay2sv.AcquirePublicKeyReply
+	(*CreateGameRequest)(nil),           // 11: lumbay2sv.CreateGameRequest
+	(*CreateGameReply)(nil),             // 12: lumbay2sv.CreateGameReply
+	(*GenerateGameCodeRequest)(nil),     // 13: lumbay2sv.GenerateGameCodeRequest
+	(*GenerateGameCodeReply)(nil),       // 14: lumbay2sv.GenerateGameCodeReply
+	(*JoinGameRequest)(nil),             // 15: lumbay2sv.JoinGameRequest
+	(*JoinGameReply)(nil),               // 16: lumbay2sv.JoinGameReply
+	(*QuitGameRequest)(nil),             // 17: lumbay2sv.QuitGameRequest
+	(*QuitGameReply)(nil),               // 18: lumbay2sv.QuitGameReply
+	(*StartGameRequest)(nil),            // 19: lumbay2sv.StartGameRequest
+	(*StartGameReply)(nil),              // 20: lumbay2sv.StartGameReply
+	(*AmendWorldObjectRequest)(nil),     // 21: lumbay2sv.AmendWorldObjectRequest
+	(*AmendWorldObjectReply)(nil),       // 22: lumbay2sv.AmendWorldObjectReply
+	(*Game)(nil),                        // 23: lumbay2sv.Game
+	(*Client)(nil),                      // 24: lumbay2sv.Client
+	(*World)(nil),                       // 25: lumbay2sv.World
+	(*WorldRegion)(nil),                 // 26: lumbay2sv.WorldRegion
+	(*WorldMap)(nil),                    // 27: lumbay2sv.WorldMap
+	(*WorldMapLocation)(nil),            // 28: lumbay2sv.WorldMapLocation
+	(*WorldObject)(nil),                 // 29: lumbay2sv.WorldObject
+	(*Ping)(nil),                        // 30: lumbay2sv.Ping
+	(*YouAreInGameUpdate)(nil),          // 31: lumbay2sv.YouAreInGameUpdate
+	(*WaitingForOtherPlayerUpdate)(nil), // 32: lumbay2sv.WaitingForOtherPlayerUpdate
+	(*ReadyToStartUpdate)(nil),          // 33: lumbay2sv.ReadyToStartUpdate
+	(*GameCodeGeneratedUpdate)(nil),     // 34: lumbay2sv.GameCodeGeneratedUpdate
+	(*YouQuitTheGameUpdate)(nil),        // 35: lumbay2sv.YouQuitTheGameUpdate
+	(*GameStartedUpdate)(nil),           // 36: lumbay2sv.GameStartedUpdate
+	(*WorldUpdate)(nil),                 // 37: lumbay2sv.WorldUpdate
+	(*WorldStatusUpdate)(nil),           // 38: lumbay2sv.WorldStatusUpdate
+	(*WorldRegionStatusUpdate)(nil),     // 39: lumbay2sv.WorldRegionStatusUpdate
+	(*WorldObjectUpdate)(nil),           // 40: lumbay2sv.WorldObjectUpdate
 }
 var file_lumbay2_proto_depIdxs = []int32{
-	21, // 0: lumbay2sv.Update.ping:type_name -> lumbay2sv.Ping
-	22, // 1: lumbay2sv.Update.you_are_in_game_update:type_name -> lumbay2sv.YouAreInGameUpdate
-	23, // 2: lumbay2sv.Update.waiting_for_other_player_update:type_name -> lumbay2sv.WaitingForOtherPlayerUpdate
-	24, // 3: lumbay2sv.Update.ready_to_start_update:type_name -> lumbay2sv.ReadyToStartUpdate
-	25, // 4: lumbay2sv.Update.game_code_generated:type_name -> lumbay2sv.GameCodeGeneratedUpdate
-	26, // 5: lumbay2sv.Update.you_quit_the_game_update:type_name -> lumbay2sv.YouQuitTheGameUpdate
-	27, // 6: lumbay2sv.Update.game_started_update:type_name -> lumbay2sv.GameStartedUpdate
-	5,  // 7: lumbay2sv.Request.acquire_client_id_request:type_name -> lumbay2sv.AcquireClientIdRequest
-	6,  // 8: lumbay2sv.Request.acquire_public_key_request:type_name -> lumbay2sv.AcquirePublicKeyRequest
-	9,  // 9: lumbay2sv.Request.create_game_request:type_name -> lumbay2sv.CreateGameRequest
-	11, // 10: lumbay2sv.Request.generate_game_code_request:type_name -> lumbay2sv.GenerateGameCodeRequest
-	13, // 11: lumbay2sv.Request.join_game_request:type_name -> lumbay2sv.JoinGameRequest
-	15, // 12: lumbay2sv.Request.quit_game_request:type_name -> lumbay2sv.QuitGameRequest
-	17, // 13: lumbay2sv.Request.start_game_request:type_name -> lumbay2sv.StartGameRequest
-	7,  // 14: lumbay2sv.Reply.acquire_client_id_reply:type_name -> lumbay2sv.AcquireClientIdReply
-	8,  // 15: lumbay2sv.Reply.acquire_public_key_reply:type_name -> lumbay2sv.AcquirePublicKeyReply
-	10, // 16: lumbay2sv.Reply.create_game_reply:type_name -> lumbay2sv.CreateGameReply
-	12, // 17: lumbay2sv.Reply.generate_game_code_reply:type_name -> lumbay2sv.GenerateGameCodeReply
-	14, // 18: lumbay2sv.Reply.join_game_reply:type_name -> lumbay2sv.JoinGameReply
-	16, // 19: lumbay2sv.Reply.quit_game_reply:type_name -> lumbay2sv.QuitGameReply
-	18, // 20: lumbay2sv.Reply.start_game_reply:type_name -> lumbay2sv.StartGameReply
-	0,  // 21: lumbay2sv.Game.status:type_name -> lumbay2sv.GameStatus
-	2,  // 22: lumbay2sv.LumbayLumbay.SendRequest:input_type -> lumbay2sv.Request
-	4,  // 23: lumbay2sv.LumbayLumbay.Subscribe:input_type -> lumbay2sv.Empty
-	3,  // 24: lumbay2sv.LumbayLumbay.SendRequest:output_type -> lumbay2sv.Reply
-	1,  // 25: lumbay2sv.LumbayLumbay.Subscribe:output_type -> lumbay2sv.Update
-	24, // [24:26] is the sub-list for method output_type
-	22, // [22:24] is the sub-list for method input_type
-	22, // [22:22] is the sub-list for extension type_name
-	22, // [22:22] is the sub-list for extension extendee
-	0,  // [0:22] is the sub-list for field type_name
+	30, // 0: lumbay2sv.Update.ping:type_name -> lumbay2sv.Ping
+	31, // 1: lumbay2sv.Update.you_are_in_game_update:type_name -> lumbay2sv.YouAreInGameUpdate
+	32, // 2: lumbay2sv.Update.waiting_for_other_player_update:type_name -> lumbay2sv.WaitingForOtherPlayerUpdate
+	33, // 3: lumbay2sv.Update.ready_to_start_update:type_name -> lumbay2sv.ReadyToStartUpdate
+	34, // 4: lumbay2sv.Update.game_code_generated:type_name -> lumbay2sv.GameCodeGeneratedUpdate
+	35, // 5: lumbay2sv.Update.you_quit_the_game_update:type_name -> lumbay2sv.YouQuitTheGameUpdate
+	36, // 6: lumbay2sv.Update.game_started_update:type_name -> lumbay2sv.GameStartedUpdate
+	37, // 7: lumbay2sv.Update.world_update:type_name -> lumbay2sv.WorldUpdate
+	38, // 8: lumbay2sv.Update.world_status_update:type_name -> lumbay2sv.WorldStatusUpdate
+	39, // 9: lumbay2sv.Update.world_region_status_update:type_name -> lumbay2sv.WorldRegionStatusUpdate
+	40, // 10: lumbay2sv.Update.world_object_update:type_name -> lumbay2sv.WorldObjectUpdate
+	7,  // 11: lumbay2sv.Request.acquire_client_id_request:type_name -> lumbay2sv.AcquireClientIdRequest
+	8,  // 12: lumbay2sv.Request.acquire_public_key_request:type_name -> lumbay2sv.AcquirePublicKeyRequest
+	11, // 13: lumbay2sv.Request.create_game_request:type_name -> lumbay2sv.CreateGameRequest
+	13, // 14: lumbay2sv.Request.generate_game_code_request:type_name -> lumbay2sv.GenerateGameCodeRequest
+	15, // 15: lumbay2sv.Request.join_game_request:type_name -> lumbay2sv.JoinGameRequest
+	17, // 16: lumbay2sv.Request.quit_game_request:type_name -> lumbay2sv.QuitGameRequest
+	19, // 17: lumbay2sv.Request.start_game_request:type_name -> lumbay2sv.StartGameRequest
+	21, // 18: lumbay2sv.Request.amend_world_object_request:type_name -> lumbay2sv.AmendWorldObjectRequest
+	9,  // 19: lumbay2sv.Reply.acquire_client_id_reply:type_name -> lumbay2sv.AcquireClientIdReply
+	10, // 20: lumbay2sv.Reply.acquire_public_key_reply:type_name -> lumbay2sv.AcquirePublicKeyReply
+	12, // 21: lumbay2sv.Reply.create_game_reply:type_name -> lumbay2sv.CreateGameReply
+	14, // 22: lumbay2sv.Reply.generate_game_code_reply:type_name -> lumbay2sv.GenerateGameCodeReply
+	16, // 23: lumbay2sv.Reply.join_game_reply:type_name -> lumbay2sv.JoinGameReply
+	18, // 24: lumbay2sv.Reply.quit_game_reply:type_name -> lumbay2sv.QuitGameReply
+	20, // 25: lumbay2sv.Reply.start_game_reply:type_name -> lumbay2sv.StartGameReply
+	22, // 26: lumbay2sv.Reply.amend_world_object_reply:type_name -> lumbay2sv.AmendWorldObjectReply
+	1,  // 27: lumbay2sv.WorldStatus.world_status_3x3:type_name -> lumbay2sv.WorldStatus3x3
+	29, // 28: lumbay2sv.AmendWorldObjectRequest.world_object:type_name -> lumbay2sv.WorldObject
+	0,  // 29: lumbay2sv.Game.status:type_name -> lumbay2sv.GameStatus
+	5,  // 30: lumbay2sv.World.status:type_name -> lumbay2sv.WorldStatus
+	27, // 31: lumbay2sv.World.map:type_name -> lumbay2sv.WorldMap
+	26, // 32: lumbay2sv.World.region:type_name -> lumbay2sv.WorldRegion
+	5,  // 33: lumbay2sv.WorldRegion.status:type_name -> lumbay2sv.WorldStatus
+	27, // 34: lumbay2sv.WorldRegion.map:type_name -> lumbay2sv.WorldMap
+	29, // 35: lumbay2sv.WorldRegion.objects:type_name -> lumbay2sv.WorldObject
+	28, // 36: lumbay2sv.WorldObject.location:type_name -> lumbay2sv.WorldMapLocation
+	25, // 37: lumbay2sv.WorldUpdate.world:type_name -> lumbay2sv.World
+	5,  // 38: lumbay2sv.WorldStatusUpdate.status:type_name -> lumbay2sv.WorldStatus
+	5,  // 39: lumbay2sv.WorldRegionStatusUpdate.status:type_name -> lumbay2sv.WorldStatus
+	29, // 40: lumbay2sv.WorldObjectUpdate.world_object:type_name -> lumbay2sv.WorldObject
+	3,  // 41: lumbay2sv.LumbayLumbay.SendRequest:input_type -> lumbay2sv.Request
+	6,  // 42: lumbay2sv.LumbayLumbay.Subscribe:input_type -> lumbay2sv.Empty
+	4,  // 43: lumbay2sv.LumbayLumbay.SendRequest:output_type -> lumbay2sv.Reply
+	2,  // 44: lumbay2sv.LumbayLumbay.Subscribe:output_type -> lumbay2sv.Update
+	43, // [43:45] is the sub-list for method output_type
+	41, // [41:43] is the sub-list for method input_type
+	41, // [41:41] is the sub-list for extension type_name
+	41, // [41:41] is the sub-list for extension extendee
+	0,  // [0:41] is the sub-list for field type_name
 }
 
 func init() { file_lumbay2_proto_init() }
@@ -1843,7 +2847,7 @@ func file_lumbay2_proto_init() {
 			}
 		}
 		file_lumbay2_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Empty); i {
+			switch v := v.(*WorldStatus); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1855,7 +2859,7 @@ func file_lumbay2_proto_init() {
 			}
 		}
 		file_lumbay2_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AcquireClientIdRequest); i {
+			switch v := v.(*Empty); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1867,7 +2871,7 @@ func file_lumbay2_proto_init() {
 			}
 		}
 		file_lumbay2_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AcquirePublicKeyRequest); i {
+			switch v := v.(*AcquireClientIdRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1879,7 +2883,7 @@ func file_lumbay2_proto_init() {
 			}
 		}
 		file_lumbay2_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AcquireClientIdReply); i {
+			switch v := v.(*AcquirePublicKeyRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1891,7 +2895,7 @@ func file_lumbay2_proto_init() {
 			}
 		}
 		file_lumbay2_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AcquirePublicKeyReply); i {
+			switch v := v.(*AcquireClientIdReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1903,7 +2907,7 @@ func file_lumbay2_proto_init() {
 			}
 		}
 		file_lumbay2_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CreateGameRequest); i {
+			switch v := v.(*AcquirePublicKeyReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1915,7 +2919,7 @@ func file_lumbay2_proto_init() {
 			}
 		}
 		file_lumbay2_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CreateGameReply); i {
+			switch v := v.(*CreateGameRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1927,7 +2931,7 @@ func file_lumbay2_proto_init() {
 			}
 		}
 		file_lumbay2_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GenerateGameCodeRequest); i {
+			switch v := v.(*CreateGameReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1939,7 +2943,7 @@ func file_lumbay2_proto_init() {
 			}
 		}
 		file_lumbay2_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GenerateGameCodeReply); i {
+			switch v := v.(*GenerateGameCodeRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1951,7 +2955,7 @@ func file_lumbay2_proto_init() {
 			}
 		}
 		file_lumbay2_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*JoinGameRequest); i {
+			switch v := v.(*GenerateGameCodeReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1963,7 +2967,7 @@ func file_lumbay2_proto_init() {
 			}
 		}
 		file_lumbay2_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*JoinGameReply); i {
+			switch v := v.(*JoinGameRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1975,7 +2979,7 @@ func file_lumbay2_proto_init() {
 			}
 		}
 		file_lumbay2_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*QuitGameRequest); i {
+			switch v := v.(*JoinGameReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1987,7 +2991,7 @@ func file_lumbay2_proto_init() {
 			}
 		}
 		file_lumbay2_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*QuitGameReply); i {
+			switch v := v.(*QuitGameRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1999,7 +3003,7 @@ func file_lumbay2_proto_init() {
 			}
 		}
 		file_lumbay2_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*StartGameRequest); i {
+			switch v := v.(*QuitGameReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2011,7 +3015,7 @@ func file_lumbay2_proto_init() {
 			}
 		}
 		file_lumbay2_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*StartGameReply); i {
+			switch v := v.(*StartGameRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2023,7 +3027,7 @@ func file_lumbay2_proto_init() {
 			}
 		}
 		file_lumbay2_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Game); i {
+			switch v := v.(*StartGameReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2035,7 +3039,7 @@ func file_lumbay2_proto_init() {
 			}
 		}
 		file_lumbay2_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Client); i {
+			switch v := v.(*AmendWorldObjectRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2047,7 +3051,7 @@ func file_lumbay2_proto_init() {
 			}
 		}
 		file_lumbay2_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Ping); i {
+			switch v := v.(*AmendWorldObjectReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2059,7 +3063,7 @@ func file_lumbay2_proto_init() {
 			}
 		}
 		file_lumbay2_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*YouAreInGameUpdate); i {
+			switch v := v.(*Game); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2071,7 +3075,7 @@ func file_lumbay2_proto_init() {
 			}
 		}
 		file_lumbay2_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*WaitingForOtherPlayerUpdate); i {
+			switch v := v.(*Client); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2083,7 +3087,7 @@ func file_lumbay2_proto_init() {
 			}
 		}
 		file_lumbay2_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ReadyToStartUpdate); i {
+			switch v := v.(*World); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2095,7 +3099,7 @@ func file_lumbay2_proto_init() {
 			}
 		}
 		file_lumbay2_proto_msgTypes[24].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GameCodeGeneratedUpdate); i {
+			switch v := v.(*WorldRegion); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2107,7 +3111,7 @@ func file_lumbay2_proto_init() {
 			}
 		}
 		file_lumbay2_proto_msgTypes[25].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*YouQuitTheGameUpdate); i {
+			switch v := v.(*WorldMap); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2119,7 +3123,151 @@ func file_lumbay2_proto_init() {
 			}
 		}
 		file_lumbay2_proto_msgTypes[26].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*WorldMapLocation); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_lumbay2_proto_msgTypes[27].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*WorldObject); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_lumbay2_proto_msgTypes[28].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Ping); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_lumbay2_proto_msgTypes[29].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*YouAreInGameUpdate); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_lumbay2_proto_msgTypes[30].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*WaitingForOtherPlayerUpdate); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_lumbay2_proto_msgTypes[31].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ReadyToStartUpdate); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_lumbay2_proto_msgTypes[32].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GameCodeGeneratedUpdate); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_lumbay2_proto_msgTypes[33].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*YouQuitTheGameUpdate); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_lumbay2_proto_msgTypes[34].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GameStartedUpdate); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_lumbay2_proto_msgTypes[35].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*WorldUpdate); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_lumbay2_proto_msgTypes[36].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*WorldStatusUpdate); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_lumbay2_proto_msgTypes[37].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*WorldRegionStatusUpdate); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_lumbay2_proto_msgTypes[38].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*WorldObjectUpdate); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2139,6 +3287,10 @@ func file_lumbay2_proto_init() {
 		(*Update_GameCodeGenerated)(nil),
 		(*Update_YouQuitTheGameUpdate)(nil),
 		(*Update_GameStartedUpdate)(nil),
+		(*Update_WorldUpdate)(nil),
+		(*Update_WorldStatusUpdate)(nil),
+		(*Update_WorldRegionStatusUpdate)(nil),
+		(*Update_WorldObjectUpdate)(nil),
 	}
 	file_lumbay2_proto_msgTypes[1].OneofWrappers = []interface{}{
 		(*Request_AcquireClientIdRequest)(nil),
@@ -2148,6 +3300,7 @@ func file_lumbay2_proto_init() {
 		(*Request_JoinGameRequest)(nil),
 		(*Request_QuitGameRequest)(nil),
 		(*Request_StartGameRequest)(nil),
+		(*Request_AmendWorldObjectRequest)(nil),
 	}
 	file_lumbay2_proto_msgTypes[2].OneofWrappers = []interface{}{
 		(*Reply_AcquireClientIdReply)(nil),
@@ -2157,14 +3310,18 @@ func file_lumbay2_proto_init() {
 		(*Reply_JoinGameReply)(nil),
 		(*Reply_QuitGameReply)(nil),
 		(*Reply_StartGameReply)(nil),
+		(*Reply_AmendWorldObjectReply)(nil),
+	}
+	file_lumbay2_proto_msgTypes[3].OneofWrappers = []interface{}{
+		(*WorldStatus_WorldStatus_3X3)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_lumbay2_proto_rawDesc,
-			NumEnums:      1,
-			NumMessages:   27,
+			NumEnums:      2,
+			NumMessages:   39,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -56,6 +56,14 @@ func (s *server) newStartGameReply() *Reply {
 	}
 }
 
+func (s *server) newAmendWorldObjectReply() *Reply {
+	return &Reply{
+		Type: &Reply_AmendWorldObjectReply{
+			AmendWorldObjectReply: &AmendWorldObjectReply{},
+		},
+	}
+}
+
 func (s *server) newWaitingForOtherPlayerUpdate() isUpdate_Type {
 	return &Update_WaitingForOtherPlayerUpdate{
 		WaitingForOtherPlayerUpdate: &WaitingForOtherPlayerUpdate{},
