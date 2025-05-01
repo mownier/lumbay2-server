@@ -13,7 +13,7 @@ func (s *server) startGame(clientId string) (*Reply, error) {
 	if err != nil {
 		return nil, err
 	}
-	s.enqueueUpdatesAndSignal(game.Player1, s.newGameStartedUpdate(), s.newWorldUpdate(world))
-	s.enqueueUpdatesAndSignal(game.Player2, s.newGameStartedUpdate(), s.newWorldUpdate(world))
+	s.enqueueUpdatesAndSignal(game.Player1, s.newWorldUpdate(world), s.newGameStartedUpdate())
+	s.enqueueUpdatesAndSignal(game.Player2, s.newWorldUpdate(world), s.newGameStartedUpdate())
 	return s.newStartGameReply(), nil
 }

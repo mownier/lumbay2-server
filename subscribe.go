@@ -68,6 +68,10 @@ func (s *server) cleanUpResources(clientId string) {
 
 func (s *server) sendInitialUpdates(clientId string, stream LumbayLumbay_SubscribeServer) error {
 	updates := []isUpdate_Type{}
+	world, _ := s.storage.getWorldForClient(clientId)
+	if world != nil {
+		updates = append(updates, s.newWorldUpdate(world))
+	}
 	game, _ := s.storage.getGameForClient(clientId)
 	if game != nil {
 		switch game.Status {

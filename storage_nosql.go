@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	"strconv"
 	"strings"
@@ -14,15 +13,16 @@ import (
 )
 
 const (
-	clientPrefix           = "client:"
-	gamePrefix             = "game:"
-	gameClientPrefix       = "game:client:"
-	clientLastSeqNumPrefix = "client:last_seq_num:"
-	clientUpdatePrefix     = "client:update:"
-	gameCodePrefix         = "game_code:"
-	gameGameCodePrefix     = "game:game_code:"
-	worldPrefix            = "world:"
-	wordlClientPrefix      = "world:client:"
+	clientPrefix              = "client:"
+	gamePrefix                = "game:"
+	gameClientPrefix          = "game:client:"
+	clientSeqNumCounterPrefix = "client:seq_num_counter:"
+	clientLastSeqNumPrefix    = "client:last_seq_num:"
+	clientUpdatePrefix        = "client:update:"
+	gameCodePrefix            = "game_code:"
+	gameGameCodePrefix        = "game:game_code:"
+	worldPrefix               = "world:"
+	wordlClientPrefix         = "world:client:"
 )
 
 type storageNoSql struct {
@@ -140,7 +140,6 @@ func (s *storageNoSql) getGame(id string) (*Game, error) {
 }
 
 func (s *storageNoSql) getGameForClient(clientId string) (*Game, error) {
-	log.Printf("get game for client %s\n", clientId)
 	var game *Game
 	key := fmt.Sprintf("%s%s", gameClientPrefix, clientId)
 	err := s.db.View(func(txn *badger.Txn) error {
@@ -454,11 +453,11 @@ func (s *storageNoSql) startGame(clientId string) (*Game, bool, error) {
 }
 
 func (s *storageNoSql) enqueueUpdate(clientId string, updateType isUpdate_Type) (*Update, error) {
-	lastSeqNumKey := fmt.Sprintf("%s%s", clientLastSeqNumPrefix, clientId)
+	seqNumCounterKey := fmt.Sprintf("%s%s", clientSeqNumCounterPrefix, clientId)
 	var update *Update
 	err := s.db.Update(func(txn *badger.Txn) error {
-		var lastSeqNum int64 = 0
-		item, err := txn.Get([]byte(lastSeqNumKey))
+		var seqNumCounter int64 = 0
+		item, err := txn.Get([]byte(seqNumCounterKey))
 		if err != nil && err != badger.ErrKeyNotFound {
 			return sverror(codes.NotFound, "failed to enqueue update", err)
 		}
@@ -471,9 +470,9 @@ func (s *storageNoSql) enqueueUpdate(clientId string, updateType isUpdate_Type) 
 			if err != nil {
 				return sverror(codes.Internal, "failed to enqueue update", err)
 			}
-			lastSeqNum = seqNum
+			seqNumCounter = seqNum
 		}
-		nextSeqNum := lastSeqNum + 1
+		nextSeqNum := seqNumCounter + 1
 		u := &Update{SequenceNumber: nextSeqNum, Type: updateType}
 		updateData, err := proto.Marshal(u)
 		if err != nil {
@@ -481,6 +480,10 @@ func (s *storageNoSql) enqueueUpdate(clientId string, updateType isUpdate_Type) 
 		}
 		updatesKey := fmt.Sprintf("%s%s:%d", clientUpdatePrefix, clientId, nextSeqNum)
 		err = txn.Set([]byte(updatesKey), updateData)
+		if err != nil {
+			return sverror(codes.Internal, "failed to enqueue update", err)
+		}
+		err = txn.Set([]byte(seqNumCounterKey), []byte(fmt.Sprintf("%d", nextSeqNum)))
 		if err != nil {
 			return sverror(codes.Internal, "failed to enqueue update", err)
 		}
@@ -656,4 +659,40 @@ func (s *storageNoSql) updateWorld(world *World, clientId string) error {
 		}
 		return nil
 	})
+}
+
+func (s *storageNoSql) getWorldForClient(clientId string) (*World, error) {
+	var world *World
+	worldClientKey := fmt.Sprintf("%s%s", wordlClientPrefix, clientId)
+	err := s.db.Update(func(txn *badger.Txn) error {
+		item, err := txn.Get([]byte(worldClientKey))
+		if err != nil {
+			return sverror(codes.NotFound, "failed to get world for client", err)
+		}
+		bytes, err := item.ValueCopy(nil)
+		if err != nil {
+			return sverror(codes.Internal, "failed to get world for client", err)
+		}
+		worldId := string(bytes)
+		worldKey := fmt.Sprintf("%s%s", worldPrefix, worldId)
+		item, err = txn.Get([]byte(worldKey))
+		if err != nil {
+			return sverror(codes.NotFound, "failed to get world for client", err)
+		}
+		bytes, err = item.ValueCopy(nil)
+		if err != nil {
+			return sverror(codes.Internal, "failed to get world for client", err)
+		}
+		w := &World{}
+		err = proto.Unmarshal(bytes, w)
+		if err != nil {
+			return sverror(codes.Internal, "failed to get world for client", err)
+		}
+		world = w
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return world, nil
 }
