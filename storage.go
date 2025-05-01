@@ -14,6 +14,10 @@ type storage interface {
 	quitGame(clientId string) (*Game, error)
 	startGame(clientId string) (*Game, bool, error)
 
+	insertWorld(world *World, clientIds []string) error
+	getWorld(worldId string, clientId string) (*World, error)
+	updateWorld(world *World, clientId string) error
+
 	getAllUpdates(clientId string) ([]*Update, error)
 	enqueueUpdate(clientId string, updateType isUpdate_Type) (*Update, error)
 	dequeueUpdates(clientId string, updates []*Update) error

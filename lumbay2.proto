@@ -54,7 +54,7 @@ message Reply {
 
 message WorldStatus {
     oneof type {
-        WorldStatus3x3 world_status_3x3 = 1;
+        WorldOneStatus world_one_status = 1;
     }
 }
 
@@ -129,16 +129,18 @@ message Client {
 
 message World {
     string id = 1;
-    WorldStatus status = 2;
-    WorldMap map = 3;
-    repeated WorldRegion region = 4;
+    string name = 2;
+    WorldStatus status = 3;
+    WorldMap map = 4;
+    repeated WorldRegion region = 5;
 }
 
 message WorldRegion {
     string id = 1;
-    WorldStatus status = 2;
-    WorldMap map = 3;
-    repeated WorldObject objects = 4;
+    string name = 2;
+    WorldStatus status = 3;
+    WorldMap map = 4;
+    repeated WorldObject objects = 5;
 }
 
 message WorldMap {
@@ -152,9 +154,15 @@ message WorldMapLocation {
     int64 y = 2;
 }
 
-message WorldObject {
+message WorldOneObject {
     string id = 1;
-    WorldMapLocation location = 2;
+}
+
+message WorldObject {
+    WorldMapLocation location = 1;
+    oneof type {
+        WorldOneObject world_one_object = 2;
+    }
 }
 
 message Ping {
@@ -207,13 +215,11 @@ enum GameStatus {
     STARTED = 3;
 }
 
-enum WorldStatus3x3 {
-    WS3X3_NOTHING = 0;
-    WS3X3_PLAYER_1_TO_MOVE = 1;
-    WS3X3_PLAYER_2_TO_MOVE = 2;
-    WS3X3_PLAYER_1_WINS = 3;
-    WS3X3_PLAYER_2_WINS = 4;
-    WS3x3_DRAW = 5;
+enum WorldOneStatus {
+    WORLD_ONE_STATUS_NOTHING = 0;
+    WORLD_ONE_STATUS_PLAYER_1_TO_MOVE = 1;
+    WORLD_ONE_STATUS_PLAYER_2_TO_MOVE = 2;
+    WORLD_ONE_STATUS_PLAYER_1_WINS = 3;
+    WORLD_ONE_STATUS_PLAYER_2_WINS = 4;
+    WORLD_ONE_STATUS_DRAW = 5;
 }
-
-
