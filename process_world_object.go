@@ -9,7 +9,12 @@ func (s *server) processWorldObject(clientId string, in *ProcessWorldObjectReque
 	}
 	switch in.WorldId {
 	case WorldId_WORLD_ID_WORLD_ONE:
-		s.processWorldOneObject(clientId, in.WorldRegionId, in.WorldObject)
+		game, err := s.processWorldOneObject(clientId, in.WorldRegionId, in.WorldObject)
+		if err != nil {
+			return nil, err
+		}
+		s.enqueueUpdatesAndSignal(game.Player1, s.newWorldObjectUpdate(in.WorldId, in.WorldRegionId, in.WorldObject))
+		s.enqueueUpdatesAndSignal(game.Player2, s.newWorldObjectUpdate(in.WorldId, in.WorldRegionId, in.WorldObject))
 	default:
 		return nil, sverror(codes.InvalidArgument, "failed to process world object", nil)
 	}

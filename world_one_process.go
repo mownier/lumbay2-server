@@ -2,16 +2,16 @@ package main
 
 import "google.golang.org/grpc/codes"
 
-func (s *server) processWorldOneObject(clientId string, worldRegionId WorldRegionId, worldObject *WorldObject) error {
+func (s *server) processWorldOneObject(clientId string, worldRegionId WorldRegionId, worldObject *WorldObject) (*Game, error) {
 	if !regionBelongsToWorldOne(worldRegionId) {
-		return sverror(codes.InvalidArgument, "failed to process world one object", nil)
+		return nil, sverror(codes.InvalidArgument, "failed to process world one object", nil)
 	}
 	if !objectBelongsToWorldOne(worldObject.Id) {
-		return sverror(codes.InvalidArgument, "failed to process world one object", nil)
+		return nil, sverror(codes.InvalidArgument, "failed to process world one object", nil)
 	}
 	world, err := s.storage.getWorldForClient(clientId)
 	if err != nil {
-		return sverror(codes.Internal, "failed to process world one object", err)
+		return nil, err
 	}
 	var worldRegion *WorldRegion
 	for _, r := range world.Regions {
@@ -21,11 +21,11 @@ func (s *server) processWorldOneObject(clientId string, worldRegionId WorldRegio
 		}
 	}
 	if worldRegion == nil {
-		return sverror(codes.Internal, "failed to process world one object", nil)
+		return nil, sverror(codes.Internal, "failed to process world one object", nil)
 	}
 	game, err := s.storage.getGameForClient(clientId)
 	if err != nil {
-		return sverror(codes.Internal, "failed to process world one object", err)
+		return nil, err
 	}
 	clientIsPlayer1 := false
 	clientIsPlayer2 := false
@@ -36,16 +36,16 @@ func (s *server) processWorldOneObject(clientId string, worldRegionId WorldRegio
 		clientIsPlayer2 = true
 	}
 	if clientIsPlayer1 && clientIsPlayer2 {
-		return sverror(codes.InvalidArgument, "failed to process world one object", nil)
+		return nil, sverror(codes.InvalidArgument, "failed to process world one object", nil)
 	}
 	if !clientIsPlayer1 && !clientIsPlayer2 {
-		return sverror(codes.InvalidArgument, "failed to process world one object", nil)
+		return nil, sverror(codes.InvalidArgument, "failed to process world one object", nil)
 	}
 	if clientIsPlayer1 && !objectBelongsToPlayer1InWorldOne(worldObject.Id) {
-		return sverror(codes.InvalidArgument, "failed to process world one object", nil)
+		return nil, sverror(codes.InvalidArgument, "failed to process world one object", nil)
 	}
 	if clientIsPlayer2 && !objectBelongsToPlayer2InWorldOne(worldObject.Id) {
-		return sverror(codes.InvalidArgument, "failed to process world one object", nil)
+		return nil, sverror(codes.InvalidArgument, "failed to process world one object", nil)
 	}
 	switch worldObject.Status {
 	case WorldObjectStatus_WORLD_ONE_OBJECT_STATUS_SPAWNED:
@@ -64,11 +64,11 @@ func (s *server) processWorldOneObject(clientId string, worldRegionId WorldRegio
 		} else if clientIsPlayer2 {
 			stoneCount = countStones(WorldObjectId_WORLD_ONE_OBJECT_STONE_2)
 		} else {
-			return sverror(codes.Internal, "failed to process world one object", nil)
+			return nil, sverror(codes.Internal, "failed to process world one object", nil)
 		}
 		const stoneCountLimit = 3
 		if stoneCount >= stoneCountLimit {
-			return sverror(codes.InvalidArgument, "failed to process world one object", nil)
+			return nil, sverror(codes.InvalidArgument, "failed to process world one object", nil)
 		}
 		verifyLocation := func(location *WorldLocation) bool {
 			if location.X < 0 || location.X >= 3 || location.Y < 0 || location.Y >= 3 {
@@ -84,12 +84,12 @@ func (s *server) processWorldOneObject(clientId string, worldRegionId WorldRegio
 			return okay
 		}
 		if !verifyLocation(worldObject.Location) {
-			return sverror(codes.InvalidArgument, "failed to process world one object", nil)
+			return nil, sverror(codes.InvalidArgument, "failed to process world one object", nil)
 		}
 		worldRegion.Objects = append(worldRegion.Objects, worldObject)
 		err = s.storage.updateWorld(world, clientId)
 		if err != nil {
-			return sverror(codes.InvalidArgument, "failed to process world one object", err)
+			return nil, err
 		}
 	case WorldObjectStatus_WORLD_ONE_OBJECT_STATUS_MOVED:
 		verifyLocation := func(location *WorldLocation) bool {
@@ -106,15 +106,15 @@ func (s *server) processWorldOneObject(clientId string, worldRegionId WorldRegio
 			return okay
 		}
 		if !verifyLocation(worldObject.Location) {
-			return sverror(codes.InvalidArgument, "failed to process world one object", nil)
+			return nil, sverror(codes.InvalidArgument, "failed to process world one object", nil)
 		}
 		worldRegion.Objects = append(worldRegion.Objects, worldObject)
 		err = s.storage.updateWorld(world, clientId)
 		if err != nil {
-			return sverror(codes.InvalidArgument, "failed to process world one object", err)
+			return nil, err
 		}
 	}
-	return nil
+	return game, nil
 }
 
 func regionBelongsToWorldOne(regionId WorldRegionId) bool {

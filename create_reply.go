@@ -107,3 +107,13 @@ func (s *server) newWorldUpdate(world *World) isUpdate_Type {
 		WorldUpdate: &WorldUpdate{World: world},
 	}
 }
+
+func (s *server) newWorldObjectUpdate(worldId WorldId, worldRegionId WorldRegionId, worldObject *WorldObject) isUpdate_Type {
+	return &Update_WorldObjectUpdate{
+		WorldObjectUpdate: &WorldObjectUpdate{
+			WorldId:       worldId,
+			WorldRegionId: worldRegionId,
+			WorldObject:   worldObject,
+		},
+	}
+}
