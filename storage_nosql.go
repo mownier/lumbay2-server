@@ -579,7 +579,8 @@ func (s *storageNoSql) insertWorld(world *World, clientIds ...string) error {
 	if err != nil {
 		return sverror(codes.Internal, "failed to insert world", err)
 	}
-	worldKey := fmt.Sprintf("%s%s", worldPrefix, world.Id)
+	worldIdStr := fmt.Sprintf("%d", world.Id)
+	worldKey := fmt.Sprintf("%s%s", worldPrefix, worldIdStr)
 	return s.db.Update(func(txn *badger.Txn) error {
 		err := txn.Set([]byte(worldKey), worldData)
 		if err != nil {
@@ -587,7 +588,7 @@ func (s *storageNoSql) insertWorld(world *World, clientIds ...string) error {
 		}
 		for _, clientId := range clientIds {
 			worldClientKey := fmt.Sprintf("%s%s", wordlClientPrefix, clientId)
-			err := txn.Set([]byte(worldClientKey), []byte(fmt.Sprintf("%d", world.Id)))
+			err := txn.Set([]byte(worldClientKey), []byte(worldIdStr))
 			if err != nil {
 				return sverror(codes.Internal, "failed to insert world", err)
 			}
