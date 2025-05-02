@@ -104,6 +104,6 @@ func (s *server) newGameStartedUpdate() isUpdate_Type {
 
 func (s *server) newWorldUpdate(world *World) isUpdate_Type {
 	return &Update_WorldUpdate{
-		WorldUpdate: &WorldUpdate{World: world},
+		WorldUpdate: &WorldUpdate{WorldId: world.Id, WorldRegionId: world.CurrentRegionId},
 	}
 }

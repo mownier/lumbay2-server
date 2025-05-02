@@ -20,9 +20,8 @@ message Update {
         YouQuitTheGameUpdate you_quit_the_game_update = 7;
         GameStartedUpdate game_started_update = 8;
         WorldUpdate world_update = 9;
-        WorldStatusUpdate world_status_update = 10;
-        WorldRegionStatusUpdate world_region_status_update = 11;
-        WorldObjectUpdate world_object_update = 12;
+        WorldRegionStatusUpdate world_region_status_update = 10;
+        WorldObjectUpdate world_object_update = 11;
     }
 }
 
@@ -55,6 +54,18 @@ message Reply {
 message WorldStatus {
     oneof type {
         WorldOneStatus world_one_status = 1;
+    }
+}
+
+message WorldRegionStatus {
+    oneof type {
+        WorldOneRegionStatus world_one_region_status = 1;
+    }
+}
+
+message WorldObjectStatus {
+    oneof type {
+        WorldOneObjectStatus world_one_object_status = 1;
     }
 }
 
@@ -131,38 +142,28 @@ message World {
     string id = 1;
     string name = 2;
     WorldStatus status = 3;
-    WorldMap map = 4;
-    repeated WorldRegion region = 5;
+    string current_region_id = 4;
+    repeated WorldRegion regions = 5;
 }
 
 message WorldRegion {
     string id = 1;
     string name = 2;
-    WorldStatus status = 3;
-    WorldMap map = 4;
+    WorldRegionStatus status = 3;
+    WorldLocation location = 4;
     repeated WorldObject objects = 5;
 }
 
-message WorldMap {
-    string id = 1;
-    int64 height = 2;
-    int64 width = 3;
-}
-
-message WorldMapLocation {
+message WorldLocation {
     int64 x = 1;
     int64 y = 2;
 }
 
-message WorldOneObject {
-    string id = 1;
-}
-
 message WorldObject {
-    WorldMapLocation location = 1;
-    oneof type {
-        WorldOneObject world_one_object = 2;
-    }
+    string id = 1;
+    string name = 2;
+    WorldObjectStatus status = 3;
+    WorldLocation location = 4;
 }
 
 message Ping {
@@ -188,12 +189,8 @@ message GameStartedUpdate {
 }
 
 message WorldUpdate {
-    World world = 1;
-}
-
-message WorldStatusUpdate {
     string world_id = 1;
-    WorldStatus status = 2;
+    string world_region_id = 2;
 }
 
 message WorldRegionStatusUpdate {
@@ -217,9 +214,19 @@ enum GameStatus {
 
 enum WorldOneStatus {
     WORLD_ONE_STATUS_NOTHING = 0;
-    WORLD_ONE_STATUS_PLAYER_1_TO_MOVE = 1;
-    WORLD_ONE_STATUS_PLAYER_2_TO_MOVE = 2;
-    WORLD_ONE_STATUS_PLAYER_1_WINS = 3;
-    WORLD_ONE_STATUS_PLAYER_2_WINS = 4;
-    WORLD_ONE_STATUS_DRAW = 5;
+}
+
+enum WorldOneRegionStatus {
+    WORLD_ONE_REGION_STATUS_NOTHING = 0;
+    WORLD_ONE_REGION_STATUS_PLAYER_1_TO_MOVE = 1;
+    WORLD_ONE_REGION_STATUS_PLAYER_2_TO_MOVE = 2;
+    WORLD_ONE_REGION_STATUS_PLAYER_1_WINS = 3;
+    WORLD_ONE_REGION_STATUS_PLAYER_2_WINS = 4;
+    WORLD_ONE_REGION_STATUS_DRAW = 5;
+}
+
+enum WorldOneObjectStatus {
+    WORLD_ONE_OBJECT_STATUS_NOTHING = 0;
+    WORLD_ONE_OBJECT_STATUS_SPAWNED = 1;
+    WORLD_ONE_OBJECT_STATUS_MOVED = 2;
 }

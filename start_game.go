@@ -8,7 +8,7 @@ func (s *server) startGame(clientId string) (*Reply, error) {
 	if startAlreadyInitiated {
 		return s.newStartGameReply(), nil
 	}
-	world := newWorldOne(game.Player1, game.Player2)
+	world := newWorldOne()
 	err = s.storage.insertWorld(world, game.Player1, game.Player2)
 	if err != nil {
 		return nil, err
