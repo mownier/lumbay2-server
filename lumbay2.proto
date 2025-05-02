@@ -34,7 +34,7 @@ message Request {
         JoinGameRequest join_game_request = 5;
         QuitGameRequest quit_game_request = 6;
         StartGameRequest start_game_request = 7;
-        AmendWorldObjectRequest amend_world_object_request = 8;
+        ProcessWorldObjectRequest process_world_object_request = 8;
     }
 }
 
@@ -47,25 +47,7 @@ message Reply {
         JoinGameReply join_game_reply = 5;
         QuitGameReply quit_game_reply = 6;
         StartGameReply start_game_reply = 7;
-        AmendWorldObjectReply amend_world_object_reply = 8;
-    }
-}
-
-message WorldStatus {
-    oneof type {
-        WorldOneStatus world_one_status = 1;
-    }
-}
-
-message WorldRegionStatus {
-    oneof type {
-        WorldOneRegionStatus world_one_region_status = 1;
-    }
-}
-
-message WorldObjectStatus {
-    oneof type {
-        WorldOneObjectStatus world_one_object_status = 1;
+        ProcessWorldObjectReply process_world_object_reply = 8;
     }
 }
 
@@ -117,13 +99,13 @@ message StartGameRequest {
 message StartGameReply {
 }
 
-message AmendWorldObjectRequest {
-    string world_id = 1;
-    string world_region_id = 2;
+message ProcessWorldObjectRequest {
+    WorldId world_id = 1;
+    WorldRegionId world_region_id = 2;
     WorldObject world_object = 3;
 }
 
-message AmendWorldObjectReply {
+message ProcessWorldObjectReply {
 }
 
 message Game {
@@ -139,16 +121,14 @@ message Client {
 }
 
 message World {
-    string id = 1;
-    string name = 2;
+    WorldId id = 1;
     WorldStatus status = 3;
-    string current_region_id = 4;
+    WorldRegionId current_region_id = 4;
     repeated WorldRegion regions = 5;
 }
 
 message WorldRegion {
-    string id = 1;
-    string name = 2;
+    WorldRegionId id = 1;
     WorldRegionStatus status = 3;
     WorldLocation location = 4;
     repeated WorldObject objects = 5;
@@ -157,13 +137,13 @@ message WorldRegion {
 message WorldLocation {
     int64 x = 1;
     int64 y = 2;
+    int64 z = 3;
 }
 
 message WorldObject {
-    string id = 1;
-    string name = 2;
-    WorldObjectStatus status = 3;
-    WorldLocation location = 4;
+    WorldObjectId id = 1;
+    WorldObjectStatus status = 2;
+    WorldLocation location = 3;
 }
 
 message Ping {
@@ -189,19 +169,18 @@ message GameStartedUpdate {
 }
 
 message WorldUpdate {
-    string world_id = 1;
-    string world_region_id = 2;
+    World world = 1;
 }
 
 message WorldRegionStatusUpdate {
-    string world_id = 1;
-    string world_region_id = 2;
+    WorldId world_id = 1;
+    WorldRegionId world_region_id = 2;
     WorldStatus status = 3;
 }
 
 message WorldObjectUpdate {
-    string world_id = 1;
-    string world_region_id = 2;
+    WorldId world_id = 1;
+    WorldRegionId world_region_id = 2;
     WorldObject world_object = 3;
 }
 
@@ -212,12 +191,13 @@ enum GameStatus {
     STARTED = 3;
 }
 
-enum WorldOneStatus {
-    WORLD_ONE_STATUS_NOTHING = 0;
+enum WorldStatus {
+    WORLD_STATUS_NOTHING = 0;
 }
 
-enum WorldOneRegionStatus {
-    WORLD_ONE_REGION_STATUS_NOTHING = 0;
+enum WorldRegionStatus {
+    WORLD_REGION_STATUS_NOTHING = 0;
+
     WORLD_ONE_REGION_STATUS_PLAYER_1_TO_MOVE = 1;
     WORLD_ONE_REGION_STATUS_PLAYER_2_TO_MOVE = 2;
     WORLD_ONE_REGION_STATUS_PLAYER_1_WINS = 3;
@@ -225,8 +205,26 @@ enum WorldOneRegionStatus {
     WORLD_ONE_REGION_STATUS_DRAW = 5;
 }
 
-enum WorldOneObjectStatus {
-    WORLD_ONE_OBJECT_STATUS_NOTHING = 0;
+enum WorldObjectStatus {
+    WORLD_OBJECT_STATUS_NOTHING = 0;
+    
     WORLD_ONE_OBJECT_STATUS_SPAWNED = 1;
     WORLD_ONE_OBJECT_STATUS_MOVED = 2;
+}
+
+enum WorldId {
+    WORLD_ID_NOTHING = 0;
+    WORLD_ID_WORLD_ONE = 1;
+}
+
+enum WorldRegionId {
+    WORLD_REGION_NOTHING = 0;
+    WORLD_ONE_REGION_ONE = 1;
+}
+
+enum WorldObjectId {
+    WORLD_OBJECT_NOTHING = 0;
+
+    WORLD_ONE_OBJECT_STONE_1 = 1;
+    WORLD_ONE_OBJECT_STONE_2 = 2;
 }

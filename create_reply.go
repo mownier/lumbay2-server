@@ -56,10 +56,10 @@ func (s *server) newStartGameReply() *Reply {
 	}
 }
 
-func (s *server) newAmendWorldObjectReply() *Reply {
+func (s *server) newProcessWorldObjectReply() *Reply {
 	return &Reply{
-		Type: &Reply_AmendWorldObjectReply{
-			AmendWorldObjectReply: &AmendWorldObjectReply{},
+		Type: &Reply_ProcessWorldObjectReply{
+			ProcessWorldObjectReply: &ProcessWorldObjectReply{},
 		},
 	}
 }
@@ -104,6 +104,6 @@ func (s *server) newGameStartedUpdate() isUpdate_Type {
 
 func (s *server) newWorldUpdate(world *World) isUpdate_Type {
 	return &Update_WorldUpdate{
-		WorldUpdate: &WorldUpdate{WorldId: world.Id, WorldRegionId: world.CurrentRegionId},
+		WorldUpdate: &WorldUpdate{World: world},
 	}
 }

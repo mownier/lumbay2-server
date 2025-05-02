@@ -587,7 +587,7 @@ func (s *storageNoSql) insertWorld(world *World, clientIds ...string) error {
 		}
 		for _, clientId := range clientIds {
 			worldClientKey := fmt.Sprintf("%s%s", wordlClientPrefix, clientId)
-			err := txn.Set([]byte(worldClientKey), []byte(world.Id))
+			err := txn.Set([]byte(worldClientKey), []byte(fmt.Sprintf("%d", world.Id)))
 			if err != nil {
 				return sverror(codes.Internal, "failed to insert world", err)
 			}
@@ -650,7 +650,7 @@ func (s *storageNoSql) updateWorld(world *World, clientId string) error {
 		if err != nil {
 			return sverror(codes.Internal, "failed to update world", err)
 		}
-		if world.Id != string(bytes) {
+		if fmt.Sprintf("%d", world.Id) != string(bytes) {
 			return sverror(codes.InvalidArgument, "failed to update world because you do not belong to it", nil)
 		}
 		err = txn.Set([]byte(worldKey), worldData)
