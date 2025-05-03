@@ -48,8 +48,8 @@ func (s *server) sendRequestInternal(publicKey, clientId string, in *Request) (*
 		return s.quitGame(clientId)
 	case *Request_StartGameRequest:
 		return s.startGame(clientId)
-	case *Request_ProcessWorldObjectRequest:
-		return s.processWorldObject(clientId, in.GetProcessWorldObjectRequest())
+	case *Request_ProcessWorldOneObjectRequest:
+		return s.processWorldOneObject(clientId, in.GetProcessWorldOneObjectRequest())
 	}
 
 	return nil, status.Error(codes.InvalidArgument, "request not known")

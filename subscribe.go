@@ -69,10 +69,42 @@ func (s *server) cleanUpResources(clientId string) {
 func (s *server) sendInitialUpdates(clientId string, stream LumbayLumbay_SubscribeServer) error {
 	updates := []isUpdate_Type{}
 	world, _ := s.storage.getWorldForClient(clientId)
-	if world != nil {
-		updates = append(updates, s.newWorldUpdate(world))
-	}
 	game, _ := s.storage.getGameForClient(clientId)
+	if world != nil {
+		switch world.Type.(type) {
+		case *World_WorldOne:
+			worldOne := world.GetWorldOne()
+			if game != nil {
+				if clientId == game.Player1 {
+					in := &ProcessWorldOneObjectRequest{
+						RegionId:     worldOne.Region.Id,
+						ObjectId:     WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_ONE,
+						ObjectStatus: WorldOneObjectStatus_WORLD_ONE_OBJECT_STATUS_ASSIGNED,
+						ObjectData:   nil,
+					}
+					updates = append(updates, s.newWorldOneObjectUpdate(in))
+				} else if clientId == game.Player2 {
+					in := &ProcessWorldOneObjectRequest{
+						RegionId:     worldOne.Region.Id,
+						ObjectId:     WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_ONE,
+						ObjectStatus: WorldOneObjectStatus_WORLD_ONE_OBJECT_STATUS_ASSIGNED,
+						ObjectData:   nil,
+					}
+					updates = append(updates, s.newWorldOneObjectUpdate(in))
+				}
+			}
+			updates = append(updates, s.newWorldOneRegionUpdate(worldOne.Region.Id))
+			for _, object := range worldOne.Region.Objects {
+				in := &ProcessWorldOneObjectRequest{
+					RegionId:     worldOne.Region.Id,
+					ObjectId:     object.Id,
+					ObjectStatus: object.Status,
+					ObjectData:   object.Data,
+				}
+				updates = append(updates, s.newWorldOneObjectUpdate(in))
+			}
+		}
+	}
 	if game != nil {
 		switch game.Status {
 		case GameStatus_READY_TO_START:

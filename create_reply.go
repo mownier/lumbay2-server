@@ -56,10 +56,10 @@ func (s *server) newStartGameReply() *Reply {
 	}
 }
 
-func (s *server) newProcessWorldObjectReply() *Reply {
+func (s *server) newProcessWorldOneObjectReply() *Reply {
 	return &Reply{
-		Type: &Reply_ProcessWorldObjectReply{
-			ProcessWorldObjectReply: &ProcessWorldObjectReply{},
+		Type: &Reply_ProcessWorldOneObjectReply{
+			ProcessWorldOneObjectReply: &ProcessWorldOneObjectReply{},
 		},
 	}
 }
@@ -102,18 +102,25 @@ func (s *server) newGameStartedUpdate() isUpdate_Type {
 	}
 }
 
-func (s *server) newWorldUpdate(world *World) isUpdate_Type {
-	return &Update_WorldUpdate{
-		WorldUpdate: &WorldUpdate{World: world},
+func (s *server) newWorldOneRegionUpdate(regionId WorldOneRegionId) isUpdate_Type {
+	return &Update_WorldOneRegionUpdate{
+		WorldOneRegionUpdate: &WorldOneRegionUpdate{RegionId: regionId},
 	}
 }
 
-func (s *server) newWorldObjectUpdate(worldId WorldId, worldRegionId WorldRegionId, worldObject *WorldObject) isUpdate_Type {
-	return &Update_WorldObjectUpdate{
-		WorldObjectUpdate: &WorldObjectUpdate{
-			WorldId:       worldId,
-			WorldRegionId: worldRegionId,
-			WorldObject:   worldObject,
+func (s *server) newWorldOneStatusUpdate(regionId WorldOneRegionId, status WorldOneStatus) isUpdate_Type {
+	return &Update_WorldOneStatusUpdate{
+		WorldOneStatusUpdate: &WorldOneStatusUpdate{RegionId: regionId, Status: status},
+	}
+}
+
+func (s *server) newWorldOneObjectUpdate(in *ProcessWorldOneObjectRequest) isUpdate_Type {
+	return &Update_WorldOneObjectUpdate{
+		WorldOneObjectUpdate: &WorldOneObjectUpdate{
+			RegionId:     in.RegionId,
+			ObjectId:     in.ObjectId,
+			ObjectStatus: in.ObjectStatus,
+			ObjectData:   in.ObjectData,
 		},
 	}
 }
