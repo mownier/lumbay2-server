@@ -74,6 +74,7 @@ func (s *server) sendInitialUpdates(clientId string, stream LumbayLumbay_Subscri
 		switch world.Type.(type) {
 		case *World_WorldOne:
 			worldOne := world.GetWorldOne()
+			updates = append(updates, s.newWorldOneRegionUpdate(worldOne.Region.Id))
 			if game != nil {
 				if clientId == game.Player1 {
 					in := &ProcessWorldOneObjectRequest{
@@ -93,7 +94,6 @@ func (s *server) sendInitialUpdates(clientId string, stream LumbayLumbay_Subscri
 					updates = append(updates, s.newWorldOneObjectUpdate(in))
 				}
 			}
-			updates = append(updates, s.newWorldOneRegionUpdate(worldOne.Region.Id))
 			for _, object := range worldOne.Region.Objects {
 				in := &ProcessWorldOneObjectRequest{
 					RegionId:     worldOne.Region.Id,
