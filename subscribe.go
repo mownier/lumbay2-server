@@ -87,7 +87,7 @@ func (s *server) sendInitialUpdates(clientId string, stream LumbayLumbay_Subscri
 				} else if clientId == game.Player2 {
 					in := &ProcessWorldOneObjectRequest{
 						RegionId:     worldOne.Region.Id,
-						ObjectId:     WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_ONE,
+						ObjectId:     WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_TWO,
 						ObjectStatus: WorldOneObjectStatus_WORLD_ONE_OBJECT_STATUS_ASSIGNED,
 						ObjectData:   nil,
 					}
