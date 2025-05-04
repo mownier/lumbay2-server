@@ -1,6 +1,8 @@
 package main
 
-import "google.golang.org/grpc/codes"
+import (
+	"google.golang.org/grpc/codes"
+)
 
 func (s *server) processWorldOneObject(clientId string, in *ProcessWorldOneObjectRequest) (*Reply, error) {
 	_, err := s.storage.getClient(clientId)
@@ -16,10 +18,10 @@ func (s *server) processWorldOneObject(clientId string, in *ProcessWorldOneObjec
 	case *World_WorldOne:
 		worldOne = world.GetWorldOne()
 	default:
-		return nil, sverror(codes.Internal, "failed to process world one object", nil)
+		return nil, sverror(codes.Internal, "1 failed to process world one object", nil)
 	}
 	if worldOne.GetRegion().Id != in.RegionId {
-		return nil, sverror(codes.InvalidArgument, "failed to process world one object", nil)
+		return nil, sverror(codes.InvalidArgument, "2 failed to process world one object", nil)
 	}
 	game, err := s.storage.getGameForClient(clientId)
 	if err != nil {
@@ -34,70 +36,47 @@ func (s *server) processWorldOneObject(clientId string, in *ProcessWorldOneObjec
 		clientIsPlayer2 = true
 	}
 	if clientIsPlayer1 && clientIsPlayer2 {
-		return nil, sverror(codes.InvalidArgument, "failed to process world one object", nil)
+		return nil, sverror(codes.InvalidArgument, "3 failed to process world one object", nil)
 	}
 	if !clientIsPlayer1 && !clientIsPlayer2 {
-		return nil, sverror(codes.InvalidArgument, "failed to process world one object", nil)
+		return nil, sverror(codes.InvalidArgument, "4 failed to process world one object", nil)
 	}
-	if clientIsPlayer1 && in.ObjectId != WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_ONE {
-		return nil, sverror(codes.InvalidArgument, "failed to process world one object", nil)
+	if clientIsPlayer1 && !playerOneDoesOwnThisWorldOneObjectId(in.ObjectId) {
+		return nil, sverror(codes.InvalidArgument, "5 failed to process world one object", nil)
 	}
-	if clientIsPlayer2 && in.ObjectId != WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_TWO {
-		return nil, sverror(codes.InvalidArgument, "failed to process world one object", nil)
+	if clientIsPlayer2 && !playerTwoDoesOwnThisWorldOneObjectId(in.ObjectId) {
+		return nil, sverror(codes.InvalidArgument, "6 failed to process world one object", nil)
 	}
 	switch in.ObjectStatus {
 	case WorldOneObjectStatus_WORLD_ONE_OBJECT_STATUS_SPAWNED:
-		countStones := func(oId WorldOneObjectId) int {
-			var count = 0
-			for _, o := range worldOne.Region.Objects {
-				if o.Id == oId {
-					count = count + 1
-				}
-			}
-			return count
-		}
 		var stoneCount int
 		if clientIsPlayer1 {
-			stoneCount = countStones(WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_ONE)
+			stoneCount = worldOne.Region.playerOneStoneCount()
 		} else if clientIsPlayer2 {
-			stoneCount = countStones(WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_TWO)
+			stoneCount = worldOne.Region.playerTwoStoneCount()
 		} else {
-			return nil, sverror(codes.Internal, "failed to process world one object", nil)
+			return nil, sverror(codes.Internal, "7 failed to process world one object", nil)
 		}
 		const stoneCountLimit = 3
 		if stoneCount >= stoneCountLimit {
-			return nil, sverror(codes.InvalidArgument, "failed to process world one object", nil)
+			return nil, sverror(codes.InvalidArgument, "8 failed to process world one object", nil)
 		}
-		verifyLocation := func(location *WorldLocation) bool {
-			if location == nil || location.X < 0 || location.X >= 3 || location.Y < 0 || location.Y >= 3 {
-				return false
-			}
-			okay := true
-			for _, object := range worldOne.Region.Objects {
-				var loc *WorldLocation
-				switch object.Data.Type.(type) {
-				case *WorldOneObjectData_Location:
-					loc = object.Data.GetLocation()
-				default:
-					loc = nil
-				}
-				if loc == nil {
-					continue
-				}
-				if loc.X == location.X && loc.Y == location.Y {
-					okay = false
-					break
-				}
-			}
-			return okay
+		occupied, err := worldOne.Region.locationIsOccupied(in.ObjectData.GetLocation())
+		if err != nil {
+			return nil, sverror(codes.InvalidArgument, "9 failed to process world one object", nil)
 		}
-		if !verifyLocation(in.ObjectData.GetLocation()) {
-			return nil, sverror(codes.InvalidArgument, "failed to process world one object", nil)
+		if occupied {
+			return nil, sverror(codes.InvalidArgument, "9.1 failed to process world one object", nil)
 		}
 		worldObject := &WorldOneObject{
 			Id:     in.ObjectId,
 			Status: in.ObjectStatus,
 			Data:   in.ObjectData,
+		}
+		if clientIsPlayer1 {
+			worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_MOVED
+		} else if clientIsPlayer2 {
+			worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_MOVED
 		}
 		worldOne.Region.Objects = append(worldOne.Region.Objects, worldObject)
 		err = s.storage.updateWorld(world, clientId)
@@ -105,44 +84,45 @@ func (s *server) processWorldOneObject(clientId string, in *ProcessWorldOneObjec
 			return nil, err
 		}
 	case WorldOneObjectStatus_WORLD_ONE_OBJECT_STATUS_MOVED:
-		verifyLocation := func(location *WorldLocation) bool {
-			if location == nil || location.X < 0 || location.X >= 3 || location.Y < 0 || location.Y >= 3 {
-				return false
-			}
-			okay := true
-			for _, object := range worldOne.Region.Objects {
-				var loc *WorldLocation
-				switch object.Data.Type.(type) {
-				case *WorldOneObjectData_Location:
-					loc = object.Data.GetLocation()
-				default:
-					loc = nil
-				}
-				if loc == nil {
-					continue
-				}
-				if loc.X == location.X && loc.Y == location.Y {
-					okay = false
-					break
-				}
-			}
-			return okay
+		occupied, err := worldOne.Region.locationIsOccupied(in.ObjectData.GetLocation())
+		if err != nil {
+			return nil, sverror(codes.InvalidArgument, "10 failed to process world one object", err)
 		}
-		if !verifyLocation(in.ObjectData.GetLocation()) {
-			return nil, sverror(codes.InvalidArgument, "failed to process world one object", nil)
+		if occupied {
+			return nil, sverror(codes.InvalidArgument, "11 failed to process world one object", nil)
 		}
-		worldObject := &WorldOneObject{
-			Id:     in.ObjectId,
-			Status: in.ObjectStatus,
-			Data:   in.ObjectData,
+		worldObject, err := worldOne.Region.getObject(in.ObjectId)
+		if err != nil {
+			return nil, sverror(codes.InvalidArgument, "12 failed to process world one object", err)
 		}
-		worldOne.Region.Objects = append(worldOne.Region.Objects, worldObject)
+		if worldObject.Data.GetLocation() == nil {
+			return nil, sverror(codes.InvalidArgument, "13 failed to process world one object", nil)
+		}
+		worldObject.Data.GetLocation().X = in.ObjectData.GetLocation().X
+		worldObject.Data.GetLocation().Y = in.ObjectData.GetLocation().Y
+		if clientIsPlayer1 {
+			worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_MOVED
+		} else if clientIsPlayer2 {
+			worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_MOVED
+		}
 		err = s.storage.updateWorld(world, clientId)
 		if err != nil {
 			return nil, err
 		}
 	}
-	s.enqueueUpdatesAndSignal(game.Player1, s.newWorldOneObjectUpdate(in))
-	s.enqueueUpdatesAndSignal(game.Player2, s.newWorldOneObjectUpdate(in))
+	player1Updates := []isUpdate_Type{s.newWorldOneObjectUpdate(in)}
+	player2Updates := []isUpdate_Type{s.newWorldOneObjectUpdate(in)}
+	if worldOne.needToMove() {
+		switch worldOne.Status {
+		case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_MOVED:
+			player1Updates = append(player1Updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_WAIT_FOR_YOUR_TURN))
+			player2Updates = append(player2Updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOUR_TURN_TO_MOVE))
+		case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_MOVED:
+			player1Updates = append(player1Updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOUR_TURN_TO_MOVE))
+			player2Updates = append(player2Updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_WAIT_FOR_YOUR_TURN))
+		}
+	}
+	s.enqueueUpdatesAndSignal(game.Player1, player1Updates...)
+	s.enqueueUpdatesAndSignal(game.Player2, player2Updates...)
 	return s.newProcessWorldOneObjectReply(), nil
 }

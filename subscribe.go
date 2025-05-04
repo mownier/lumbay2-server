@@ -79,7 +79,7 @@ func (s *server) sendInitialUpdates(clientId string, stream LumbayLumbay_Subscri
 				if clientId == game.Player1 {
 					in := &ProcessWorldOneObjectRequest{
 						RegionId:     worldOne.Region.Id,
-						ObjectId:     WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_ONE,
+						ObjectId:     WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_PLAYER_ONE,
 						ObjectStatus: WorldOneObjectStatus_WORLD_ONE_OBJECT_STATUS_ASSIGNED,
 						ObjectData:   nil,
 					}
@@ -87,21 +87,12 @@ func (s *server) sendInitialUpdates(clientId string, stream LumbayLumbay_Subscri
 				} else if clientId == game.Player2 {
 					in := &ProcessWorldOneObjectRequest{
 						RegionId:     worldOne.Region.Id,
-						ObjectId:     WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_TWO,
+						ObjectId:     WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_PLAYER_TWO,
 						ObjectStatus: WorldOneObjectStatus_WORLD_ONE_OBJECT_STATUS_ASSIGNED,
 						ObjectData:   nil,
 					}
 					updates = append(updates, s.newWorldOneObjectUpdate(in))
 				}
-			}
-			for _, object := range worldOne.Region.Objects {
-				in := &ProcessWorldOneObjectRequest{
-					RegionId:     worldOne.Region.Id,
-					ObjectId:     object.Id,
-					ObjectStatus: object.Status,
-					ObjectData:   object.Data,
-				}
-				updates = append(updates, s.newWorldOneObjectUpdate(in))
 			}
 		}
 	}
@@ -117,6 +108,46 @@ func (s *server) sendInitialUpdates(clientId string, stream LumbayLumbay_Subscri
 		gameCode, _ := s.storage.getGameCodeForGame(game.Id)
 		if len(gameCode) > 0 {
 			updates = append(updates, s.newGameCodeGeneratedUpdate(gameCode))
+		}
+		if world != nil {
+			switch world.Type.(type) {
+			case *World_WorldOne:
+				worldOne := world.GetWorldOne()
+				if clientId == game.Player1 {
+					if worldOne.needToDetermineFirstMover() {
+						worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_MOVED
+					}
+					if worldOne.needToMove() {
+						switch worldOne.Status {
+						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_MOVED:
+							updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_WAIT_FOR_YOUR_TURN))
+						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_MOVED:
+							updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOUR_TURN_TO_MOVE))
+						}
+					}
+				} else if clientId == game.Player2 {
+					if worldOne.needToDetermineFirstMover() {
+						worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_MOVED
+					}
+					if worldOne.needToMove() {
+						switch worldOne.Status {
+						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_MOVED:
+							updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_WAIT_FOR_YOUR_TURN))
+						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_MOVED:
+							updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOUR_TURN_TO_MOVE))
+						}
+					}
+				}
+				for _, object := range worldOne.Region.Objects {
+					in := &ProcessWorldOneObjectRequest{
+						RegionId:     worldOne.Region.Id,
+						ObjectId:     object.Id,
+						ObjectStatus: object.Status,
+						ObjectData:   object.Data,
+					}
+					updates = append(updates, s.newWorldOneObjectUpdate(in))
+				}
+			}
 		}
 	}
 	for _, update := range updates {

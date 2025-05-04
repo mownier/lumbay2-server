@@ -640,7 +640,7 @@ func (s *storageNoSql) updateWorld(world *World, clientId string) error {
 	if err != nil {
 		return sverror(codes.Internal, "failed to update world", err)
 	}
-	worldKey := fmt.Sprintf("%s%s", worldPrefix, world.Id)
+	worldKey := fmt.Sprintf("%s%d", worldPrefix, world.Id)
 	worldClientKey := fmt.Sprintf("%s%s", wordlClientPrefix, clientId)
 	return s.db.Update(func(txn *badger.Txn) error {
 		item, err := txn.Get([]byte(worldClientKey))
