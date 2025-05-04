@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
@@ -155,6 +157,7 @@ func (s *server) sendInitialUpdates(clientId string, stream LumbayLumbay_Subscri
 		if err != nil {
 			return err
 		}
+		<-time.After(100 * time.Millisecond)
 	}
 	return nil
 }
