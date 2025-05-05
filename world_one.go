@@ -291,3 +291,9 @@ func (w *WorldOne) gameIsOver() bool {
 	}
 	return false
 }
+
+func (w *WorldOne) viableForLife() bool {
+	return w.Status != WorldOneStatus_WORLD_ONE_STATUS_ABANDONED &&
+		w.Status != WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_EXITED &&
+		w.Status != WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_EXITED
+}

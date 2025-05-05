@@ -24,6 +24,8 @@ message Update {
         WorldOneObjectUpdate world_one_object_update = 11;
         YouConfirmForRestartUpdate you_confirm_for_restart_update = 12;
         OtherConfirmsForRestartUpdate other_confirms_for_restart_update = 13;
+        YouExitWorldUpdate you_exit_world_update = 14;
+        OtherExitsWorldUpdate other_exits_world_update = 15;
     }
 }
 
@@ -157,6 +159,12 @@ message YouConfirmForRestartUpdate {
 message OtherConfirmsForRestartUpdate {
 }
 
+message YouExitWorldUpdate {
+}
+
+message OtherExitsWorldUpdate{
+}
+
 enum GameStatus {
     NONE = 0;
     WAITING_FOR_OTHER_PLAYER = 1;
@@ -200,6 +208,9 @@ enum WorldOneStatus {
     WORLD_ONE_STATUS_PLAYER_ONE_CONFIRMS_RESTART = 13;
     WORLD_ONE_STATUS_PLAYER_TWO_CONFIRMS_RESTART = 14;
     WORLD_ONE_STATUS_RESTARTED = 15;
+    WORLD_ONE_STATUS_PLAYER_ONE_EXITED = 16;
+    WORLD_ONE_STATUS_PLAYER_TWO_EXITED = 17;
+    WORLD_ONE_STATUS_ABANDONED = 18;
 }
 
 message WorldOneRegion {

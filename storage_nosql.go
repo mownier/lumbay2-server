@@ -658,3 +658,14 @@ func (s *storageNoSql) getWorldForClient(clientId string) (*World, error) {
 	}
 	return world, nil
 }
+
+func (s *storageNoSql) removeWorldForClient(clientId string) error {
+	worldClientKey := fmt.Sprintf("%s%s", wordlClientPrefix, clientId)
+	return s.db.Update(func(txn *badger.Txn) error {
+		err := txn.Delete([]byte(worldClientKey))
+		if err != nil {
+			return sverror(codes.Internal, "failed to remove world for client", err)
+		}
+		return nil
+	})
+}

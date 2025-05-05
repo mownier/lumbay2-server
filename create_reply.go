@@ -152,3 +152,15 @@ func (s *server) newOtherConfirmsForRestartUpdate() isUpdate_Type {
 		OtherConfirmsForRestartUpdate: &OtherConfirmsForRestartUpdate{},
 	}
 }
+
+func (s *server) newYouExitWorldUpdate() isUpdate_Type {
+	return &Update_YouExitWorldUpdate{
+		YouExitWorldUpdate: &YouExitWorldUpdate{},
+	}
+}
+
+func (s *server) newOtherExitsWorldUpdate() isUpdate_Type {
+	return &Update_OtherExitsWorldUpdate{
+		OtherExitsWorldUpdate: &OtherExitsWorldUpdate{},
+	}
+}
