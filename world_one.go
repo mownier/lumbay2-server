@@ -297,3 +297,8 @@ func (w *WorldOne) viableForLife() bool {
 		w.Status != WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_EXITED &&
 		w.Status != WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_EXITED
 }
+
+func (w *WorldOne) restartIsInitiated() bool {
+	return w.Status == WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_CONFIRMS_RESTART ||
+		w.Status == WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_CONFIRMS_RESTART
+}

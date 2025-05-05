@@ -17,7 +17,7 @@ type storage interface {
 	insertWorld(world *World, clientIds ...string) error
 	updateWorld(world *World, clientId string) error
 	getWorldForClient(clientId string) (*World, error)
-	removeWorldForClient(clientId string) error
+	detachWorldFromClient(world *World, clientId string) error
 
 	getAllUpdates(clientId string) ([]*Update, error)
 	enqueueUpdate(clientId string, updateType isUpdate_Type) (*Update, error)

@@ -659,12 +659,21 @@ func (s *storageNoSql) getWorldForClient(clientId string) (*World, error) {
 	return world, nil
 }
 
-func (s *storageNoSql) removeWorldForClient(clientId string) error {
+func (s *storageNoSql) detachWorldFromClient(world *World, clientId string) error {
+	worldData, err := proto.Marshal(world)
+	if err != nil {
+		sverror(codes.Internal, "failed to detach world from client", err)
+	}
 	worldClientKey := fmt.Sprintf("%s%s", wordlClientPrefix, clientId)
+	worldKey := fmt.Sprintf("%s%s", worldPrefix, world.DbId)
 	return s.db.Update(func(txn *badger.Txn) error {
 		err := txn.Delete([]byte(worldClientKey))
 		if err != nil {
-			return sverror(codes.Internal, "failed to remove world for client", err)
+			return sverror(codes.Internal, "failed to detach world from client", err)
+		}
+		err = txn.Set([]byte(worldKey), worldData)
+		if err != nil {
+			return sverror(codes.Internal, "failed to detach world from client", err)
 		}
 		return nil
 	})

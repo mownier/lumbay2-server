@@ -15,7 +15,7 @@ func (s *server) restartWorld(clientId string) (*Reply, error) {
 	case *World_WorldOne:
 		worldOne := world.GetWorldOne()
 		if !worldOne.gameIsOver() {
-			return nil, sverror(codes.InvalidArgument, "1failed to restart world", nil)
+			return nil, sverror(codes.InvalidArgument, "failed to restart world", nil)
 		}
 		if clientId == game.Player1 {
 			if worldOne.Status != WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_CONFIRMS_RESTART {

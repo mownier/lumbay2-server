@@ -115,6 +115,24 @@ func (s *server) sendInitialUpdates(clientId string, stream LumbayLumbay_Subscri
 			switch world.Type.(type) {
 			case *World_WorldOne:
 				worldOne := world.GetWorldOne()
+				if !worldOne.viableForLife() ||
+					worldOne.Status == WorldOneStatus_WORLD_ONE_STATUS_RESTARTED {
+					break
+				}
+				if worldOne.restartIsInitiated() {
+					if clientId == game.Player1 {
+						switch worldOne.Status {
+						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_CONFIRMS_RESTART:
+							updates = append(updates, s.newYouConfirmForRestartUpdate())
+						}
+					} else if clientId == game.Player2 {
+						switch worldOne.Status {
+						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_CONFIRMS_RESTART:
+							updates = append(updates, s.newYouConfirmForRestartUpdate())
+						}
+					}
+					break
+				}
 				if clientId == game.Player1 {
 					if worldOne.needToDetermineFirstMover() {
 						worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_MOVED
