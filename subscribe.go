@@ -115,8 +115,11 @@ func (s *server) sendInitialUpdates(clientId string, stream LumbayLumbay_Subscri
 			switch world.Type.(type) {
 			case *World_WorldOne:
 				worldOne := world.GetWorldOne()
-				if !worldOne.viableForLife() ||
-					worldOne.Status == WorldOneStatus_WORLD_ONE_STATUS_RESTARTED {
+				if !worldOne.viableForLife() {
+					break
+				}
+				if worldOne.Status == WorldOneStatus_WORLD_ONE_STATUS_RESTARTED {
+					updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_RESTARTED))
 					break
 				}
 				if worldOne.restartIsInitiated() {
