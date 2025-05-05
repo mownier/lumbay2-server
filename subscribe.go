@@ -124,11 +124,15 @@ func (s *server) sendInitialUpdates(clientId string, stream LumbayLumbay_Subscri
 						switch worldOne.Status {
 						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_CONFIRMS_RESTART:
 							updates = append(updates, s.newYouConfirmForRestartUpdate())
+						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_CONFIRMS_RESTART:
+							updates = append(updates, s.newOtherConfirmsForRestartUpdate())
 						}
 					} else if clientId == game.Player2 {
 						switch worldOne.Status {
 						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_CONFIRMS_RESTART:
 							updates = append(updates, s.newYouConfirmForRestartUpdate())
+						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_CONFIRMS_RESTART:
+							updates = append(updates, s.newOtherConfirmsForRestartUpdate())
 						}
 					}
 					break
