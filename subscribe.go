@@ -149,6 +149,33 @@ func (s *server) sendInitialUpdates(clientId string, stream LumbayLumbay_Subscri
 					}
 					updates = append(updates, s.newWorldOneObjectUpdate(in))
 				}
+				_, worldOneWinner := worldOne.whoIsTheWinner()
+				if worldOneWinner == WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_PLAYER_ONE ||
+					worldOneWinner == WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_PLAYER_TWO {
+					if clientId == game.Player1 {
+						switch worldOne.Status {
+						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_WINS:
+							updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOU_WIN))
+						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_WINS_BY_OUT_OF_MOVES:
+							updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOU_WIN_BY_OUT_OF_MOVES))
+						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_WINS:
+							updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOU_LOSE))
+						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_WINS_BY_OUT_OF_MOVES:
+							updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOU_LOSE_BY_OUT_OF_MOVES))
+						}
+					} else if clientId == game.Player2 {
+						switch worldOne.Status {
+						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_WINS:
+							updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOU_LOSE))
+						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_WINS_BY_OUT_OF_MOVES:
+							updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOU_LOSE_BY_OUT_OF_MOVES))
+						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_WINS:
+							updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOU_WIN))
+						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_WINS_BY_OUT_OF_MOVES:
+							updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOU_WIN_BY_OUT_OF_MOVES))
+						}
+					}
+				}
 			}
 		}
 	}

@@ -15,7 +15,6 @@ type storage interface {
 	startGame(clientId string) (*Game, bool, error)
 
 	insertWorld(world *World, clientIds ...string) error
-	getWorld(worldId string, clientId string) (*World, error)
 	updateWorld(world *World, clientId string) error
 	getWorldForClient(clientId string) (*World, error)
 

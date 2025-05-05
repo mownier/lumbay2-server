@@ -141,9 +141,10 @@ enum GameStatus {
 }
 
 message World {
-    WorldId id = 1;
+    string db_id = 1;
+    WorldId id = 2;
     oneof type {
-        WorldOne world_one = 2;
+        WorldOne world_one = 3;
     }
 }
 

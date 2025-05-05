@@ -579,8 +579,7 @@ func (s *storageNoSql) insertWorld(world *World, clientIds ...string) error {
 	if err != nil {
 		return sverror(codes.Internal, "failed to insert world", err)
 	}
-	worldIdStr := fmt.Sprintf("%d", world.Id)
-	worldKey := fmt.Sprintf("%s%s", worldPrefix, worldIdStr)
+	worldKey := fmt.Sprintf("%s%s", worldPrefix, world.DbId)
 	return s.db.Update(func(txn *badger.Txn) error {
 		err := txn.Set([]byte(worldKey), worldData)
 		if err != nil {
@@ -588,7 +587,7 @@ func (s *storageNoSql) insertWorld(world *World, clientIds ...string) error {
 		}
 		for _, clientId := range clientIds {
 			worldClientKey := fmt.Sprintf("%s%s", wordlClientPrefix, clientId)
-			err := txn.Set([]byte(worldClientKey), []byte(worldIdStr))
+			err := txn.Set([]byte(worldClientKey), []byte(world.DbId))
 			if err != nil {
 				return sverror(codes.Internal, "failed to insert world", err)
 			}
@@ -597,50 +596,12 @@ func (s *storageNoSql) insertWorld(world *World, clientIds ...string) error {
 	})
 }
 
-func (s *storageNoSql) getWorld(worldId string, clientId string) (*World, error) {
-	var world *World
-	worldKey := fmt.Sprintf("%s%s", worldPrefix, worldId)
-	worldClientKey := fmt.Sprintf("%s%s", wordlClientPrefix, clientId)
-	err := s.db.View(func(txn *badger.Txn) error {
-		item, err := txn.Get([]byte(worldClientKey))
-		if err != nil {
-			return sverror(codes.NotFound, "failed to get world", err)
-		}
-		bytes, err := item.ValueCopy(nil)
-		if err != nil {
-			return sverror(codes.Internal, "failed to get world", err)
-		}
-		if worldId != string(bytes) {
-			return sverror(codes.InvalidArgument, "failed to get world because you do not belong to it", nil)
-		}
-		item, err = txn.Get([]byte(worldKey))
-		if err != nil {
-			return sverror(codes.Internal, "failed to get world", err)
-		}
-		bytes, err = item.ValueCopy(nil)
-		if err != nil {
-			return sverror(codes.Internal, "failed to get world", err)
-		}
-		w := &World{}
-		err = proto.Unmarshal(bytes, w)
-		if err != nil {
-			return sverror(codes.Internal, "failed to get world", err)
-		}
-		world = w
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	return world, nil
-}
-
 func (s *storageNoSql) updateWorld(world *World, clientId string) error {
 	worldData, err := proto.Marshal(world)
 	if err != nil {
 		return sverror(codes.Internal, "failed to update world", err)
 	}
-	worldKey := fmt.Sprintf("%s%d", worldPrefix, world.Id)
+	worldKey := fmt.Sprintf("%s%s", worldPrefix, world.DbId)
 	worldClientKey := fmt.Sprintf("%s%s", wordlClientPrefix, clientId)
 	return s.db.Update(func(txn *badger.Txn) error {
 		item, err := txn.Get([]byte(worldClientKey))
@@ -651,7 +612,7 @@ func (s *storageNoSql) updateWorld(world *World, clientId string) error {
 		if err != nil {
 			return sverror(codes.Internal, "failed to update world", err)
 		}
-		if fmt.Sprintf("%d", world.Id) != string(bytes) {
+		if world.DbId != string(bytes) {
 			return sverror(codes.InvalidArgument, "failed to update world because you do not belong to it", nil)
 		}
 		err = txn.Set([]byte(worldKey), worldData)
