@@ -64,6 +64,22 @@ func (s *server) newProcessWorldOneObjectReply() *Reply {
 	}
 }
 
+func (s *server) newExitWorldReply() *Reply {
+	return &Reply{
+		Type: &Reply_ExitWorldReply{
+			ExitWorldReply: &ExitWorldReply{},
+		},
+	}
+}
+
+func (s *server) newRestartWorldReply() *Reply {
+	return &Reply{
+		Type: &Reply_RestartWorldReply{
+			RestartWorldReply: &RestartWorldReply{},
+		},
+	}
+}
+
 func (s *server) newWaitingForOtherPlayerUpdate() isUpdate_Type {
 	return &Update_WaitingForOtherPlayerUpdate{
 		WaitingForOtherPlayerUpdate: &WaitingForOtherPlayerUpdate{},
