@@ -22,6 +22,8 @@ message Update {
         WorldOneRegionUpdate world_one_region_update = 9;
         WorldOneStatusUpdate world_one_status_update = 10;
         WorldOneObjectUpdate world_one_object_update = 11;
+        YouConfirmForRestartUpdate you_confirm_for_restart_update = 12;
+        OtherConfirmsForRestartUpdate other_confirms_for_restart_update = 13;
     }
 }
 
@@ -147,6 +149,12 @@ message YouQuitTheGameUpdate {
 }
 
 message GameStartedUpdate {
+}
+
+message YouConfirmForRestartUpdate {
+}
+
+message OtherConfirmsForRestartUpdate {
 }
 
 enum GameStatus {

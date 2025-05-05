@@ -1,5 +1,61 @@
 package main
 
+import "google.golang.org/grpc/codes"
+
 func (s *server) restartWorld(clientId string) (*Reply, error) {
-	return nil, nil
+	game, err := s.storage.getGameForClient(clientId)
+	if err != nil {
+		return nil, err
+	}
+	world, err := s.storage.getWorldForClient(clientId)
+	if err != nil {
+		return nil, err
+	}
+	switch world.Type.(type) {
+	case *World_WorldOne:
+		worldOne := world.GetWorldOne()
+		if !worldOne.gameIsOver() {
+			return nil, sverror(codes.InvalidArgument, "1failed to restart world", nil)
+		}
+		if clientId == game.Player1 {
+			if worldOne.Status != WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_CONFIRMS_RESTART {
+				worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_CONFIRMS_RESTART
+				err := s.storage.updateWorld(world, clientId)
+				if err != nil {
+					return nil, err
+				}
+				s.enqueueUpdatesAndSignal(game.Player1, s.newYouConfirmForRestartUpdate())
+				s.enqueueUpdatesAndSignal(game.Player2, s.newOtherConfirmsForRestartUpdate())
+			} else if worldOne.Status == WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_CONFIRMS_RESTART {
+				worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_RESTARTED
+				worldOne.Region.Objects = []*WorldOneObject{}
+				err := s.storage.updateWorld(world, clientId)
+				if err != nil {
+					return nil, err
+				}
+				s.enqueueUpdatesAndSignal(game.Player1, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_RESTARTED))
+				s.enqueueUpdatesAndSignal(game.Player2, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_RESTARTED))
+			}
+		} else if clientId == game.Player2 {
+			if worldOne.Status != WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_CONFIRMS_RESTART {
+				worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_CONFIRMS_RESTART
+				err := s.storage.updateWorld(world, clientId)
+				if err != nil {
+					return nil, err
+				}
+				s.enqueueUpdatesAndSignal(game.Player1, s.newOtherConfirmsForRestartUpdate())
+				s.enqueueUpdatesAndSignal(game.Player2, s.newYouConfirmForRestartUpdate())
+			} else if worldOne.Status == WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_CONFIRMS_RESTART {
+				worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_RESTARTED
+				worldOne.Region.Objects = []*WorldOneObject{}
+				err := s.storage.updateWorld(world, clientId)
+				if err != nil {
+					return nil, err
+				}
+				s.enqueueUpdatesAndSignal(game.Player1, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_RESTARTED))
+				s.enqueueUpdatesAndSignal(game.Player2, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_RESTARTED))
+			}
+		}
+	}
+	return s.newRestartWorldReply(), nil
 }

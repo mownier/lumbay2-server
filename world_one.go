@@ -282,3 +282,12 @@ func worldOneStoneBelongsToPlayerTwo(id WorldOneObjectId) bool {
 		id == WorldOneObjectId_WORLD_ONE_OBJECT_ID_PLAYER_TWO_STONE_TWO ||
 		id == WorldOneObjectId_WORLD_ONE_OBJECT_ID_PLAYER_TWO_STONE_THREE
 }
+
+func (w *WorldOne) gameIsOver() bool {
+	_, winner := w.whoIsTheWinner()
+	if winner == WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_PLAYER_ONE ||
+		winner == WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_PLAYER_TWO {
+		return true
+	}
+	return false
+}

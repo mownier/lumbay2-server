@@ -140,3 +140,15 @@ func (s *server) newWorldOneObjectUpdate(in *ProcessWorldOneObjectRequest) isUpd
 		},
 	}
 }
+
+func (s *server) newYouConfirmForRestartUpdate() isUpdate_Type {
+	return &Update_YouConfirmForRestartUpdate{
+		YouConfirmForRestartUpdate: &YouConfirmForRestartUpdate{},
+	}
+}
+
+func (s *server) newOtherConfirmsForRestartUpdate() isUpdate_Type {
+	return &Update_OtherConfirmsForRestartUpdate{
+		OtherConfirmsForRestartUpdate: &OtherConfirmsForRestartUpdate{},
+	}
+}
