@@ -35,6 +35,8 @@ message Request {
         QuitGameRequest quit_game_request = 6;
         StartGameRequest start_game_request = 7;
         ProcessWorldOneObjectRequest process_world_one_object_request = 8;
+        RestartWorldRequest restart_world_request = 9;
+        ExitWorldRequest exit_world_request = 10;
     }
 }
 
@@ -48,6 +50,8 @@ message Reply {
         QuitGameReply quit_game_reply = 6;
         StartGameReply start_game_reply = 7;
         ProcessWorldOneObjectReply process_world_one_object_reply = 8;
+        RestartWorldReply restart_world_reply = 9;
+        ExitWorldReply exit_world_reply = 10;
     }
 }
 
@@ -97,6 +101,18 @@ message StartGameRequest {
 }
 
 message StartGameReply {
+}
+
+message RestartWorldRequest {
+}
+
+message RestartWorldReply {
+}
+
+message ExitWorldRequest {
+}
+
+message ExitWorldReply {
 }
 
 message Game {
