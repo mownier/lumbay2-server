@@ -164,3 +164,9 @@ func (s *server) newOtherExitsWorldUpdate() isUpdate_Type {
 		OtherExitsWorldUpdate: &OtherExitsWorldUpdate{},
 	}
 }
+
+func (s *server) newOtherPlayerNotYetReadyUpdate() isUpdate_Type {
+	return &Update_OtherPlayerNotYetReadyUpdate{
+		OtherPlayerNotYetReadyUpdate: &OtherPlayerNotYetReadyUpdate{},
+	}
+}

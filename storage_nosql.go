@@ -659,14 +659,16 @@ func (s *storageNoSql) getWorldForClient(clientId string) (*World, error) {
 	return world, nil
 }
 
-func (s *storageNoSql) detachWorldFromClient(world *World, clientId string) error {
+func (s *storageNoSql) detachWorldFromClient(world *World, clientId string) (*Game, error) {
 	worldData, err := proto.Marshal(world)
 	if err != nil {
-		sverror(codes.Internal, "failed to detach world from client", err)
+		return nil, sverror(codes.Internal, "failed to detach world from client", err)
 	}
+	var updatedGame *Game
 	worldClientKey := fmt.Sprintf("%s%s", wordlClientPrefix, clientId)
 	worldKey := fmt.Sprintf("%s%s", worldPrefix, world.DbId)
-	return s.db.Update(func(txn *badger.Txn) error {
+	gameClientKey := fmt.Sprintf("%s%s", gameClientPrefix, clientId)
+	err = s.db.Update(func(txn *badger.Txn) error {
 		err := txn.Delete([]byte(worldClientKey))
 		if err != nil {
 			return sverror(codes.Internal, "failed to detach world from client", err)
@@ -675,6 +677,50 @@ func (s *storageNoSql) detachWorldFromClient(world *World, clientId string) erro
 		if err != nil {
 			return sverror(codes.Internal, "failed to detach world from client", err)
 		}
+		item, err := txn.Get([]byte(gameClientKey))
+		if err != nil {
+			return sverror(codes.NotFound, "failed to detach world from client", err)
+		}
+		gameIdData, err := item.ValueCopy(nil)
+		if err != nil {
+			return sverror(codes.Internal, "failed to detach world from client", err)
+		}
+		gameId := string(gameIdData)
+		gameKey := fmt.Sprintf("%s%s", gamePrefix, gameId)
+		item, err = txn.Get([]byte(gameKey))
+		if err != nil {
+			return sverror(codes.NotFound, "failed to detach world from client", err)
+		}
+		gameData, err := item.ValueCopy(nil)
+		if err != nil {
+			return sverror(codes.Internal, "failed to detach world from client", err)
+		}
+		game := &Game{}
+		err = proto.Unmarshal(gameData, game)
+		if err != nil {
+			return sverror(codes.Internal, "failed to detach world from client", err)
+		}
+		oldStatus := game.Status
+		if game.Status == GameStatus_OTHER_PLAYER_NOT_YET_READY {
+			game.Status = GameStatus_READY_TO_START
+		} else if game.Status == GameStatus_STARTED {
+			game.Status = GameStatus_OTHER_PLAYER_NOT_YET_READY
+		}
+		if oldStatus != game.Status {
+			bytes, err := proto.Marshal(game)
+			if err != nil {
+				return sverror(codes.Internal, "failed to detach world from client", err)
+			}
+			err = txn.Set([]byte(gameKey), bytes)
+			if err != nil {
+				return sverror(codes.Internal, "failed to detach world from client", err)
+			}
+		}
+		updatedGame = game
 		return nil
 	})
+	if err != nil {
+		return nil, err
+	}
+	return updatedGame, nil
 }

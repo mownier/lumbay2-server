@@ -26,6 +26,7 @@ message Update {
         OtherConfirmsForRestartUpdate other_confirms_for_restart_update = 13;
         YouExitWorldUpdate you_exit_world_update = 14;
         OtherExitsWorldUpdate other_exits_world_update = 15;
+        OtherPlayerNotYetReadyUpdate other_player_not_yet_ready_update = 16;
     }
 }
 
@@ -162,7 +163,10 @@ message OtherConfirmsForRestartUpdate {
 message YouExitWorldUpdate {
 }
 
-message OtherExitsWorldUpdate{
+message OtherExitsWorldUpdate {
+}
+
+message OtherPlayerNotYetReadyUpdate {
 }
 
 enum GameStatus {
@@ -170,6 +174,7 @@ enum GameStatus {
     WAITING_FOR_OTHER_PLAYER = 1;
     READY_TO_START = 2;
     STARTED = 3;
+    OTHER_PLAYER_NOT_YET_READY = 4;
 }
 
 message World {
