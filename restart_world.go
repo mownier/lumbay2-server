@@ -1,6 +1,8 @@
 package main
 
-import "google.golang.org/grpc/codes"
+import (
+	"google.golang.org/grpc/codes"
+)
 
 func (s *server) restartWorld(clientId string) (*Reply, error) {
 	game, err := s.storage.getGameForClient(clientId)
@@ -14,7 +16,7 @@ func (s *server) restartWorld(clientId string) (*Reply, error) {
 	switch world.Type.(type) {
 	case *World_WorldOne:
 		worldOne := world.GetWorldOne()
-		if !worldOne.gameIsOver() {
+		if !worldOne.gameIsOver() && !worldOne.restartIsInitiated() {
 			return nil, sverror(codes.InvalidArgument, "failed to restart world", nil)
 		}
 		if clientId == game.Player1 {
