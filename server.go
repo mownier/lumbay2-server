@@ -95,3 +95,18 @@ func generateCode(length int) string {
 func generateGameCode() string {
 	return generateCode(8)
 }
+
+func randomInt(num1, num2 int) int {
+	var min int
+	var max int
+	if num1 < num2 {
+		min = num1
+		max = num2
+	} else {
+		min = num2
+		max = num1
+	}
+	source := mrand.NewSource(time.Now().UnixNano())
+	r := mrand.New(source)
+	return min + r.Intn(max-min+1)
+}

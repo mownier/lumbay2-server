@@ -19,7 +19,7 @@ func newWorldOne() *World {
 func newWorldTypeWorldOne() *WorldOne {
 	region := newWorldOneRegionOne()
 	return &WorldOne{
-		Status:    WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_FIRST_MOVE,
+		Status:    randomWorldOneFirstMover(),
 		Region:    region,
 		RegionIds: []WorldOneRegionId{region.Id},
 	}
@@ -303,4 +303,11 @@ func (w *WorldOne) viableForLife() bool {
 func (w *WorldOne) restartIsInitiated() bool {
 	return w.Status == WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_CONFIRMS_RESTART ||
 		w.Status == WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_CONFIRMS_RESTART
+}
+
+func randomWorldOneFirstMover() WorldOneStatus {
+	if randomInt(1, 100)%2 == 0 {
+		return WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_FIRST_MOVE
+	}
+	return WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_FIRST_MOVE
 }

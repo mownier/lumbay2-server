@@ -21,7 +21,7 @@ func (s *server) restartWorld(clientId string) (*Reply, error) {
 		}
 		if clientId == game.Player1 {
 			if worldOne.Status == WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_CONFIRMS_RESTART {
-				worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_FIRST_MOVE
+				worldOne.Status = randomWorldOneFirstMover()
 				worldOne.Region.Objects = []*WorldOneObject{}
 				err := s.storage.updateWorld(world, clientId)
 				if err != nil {
@@ -40,7 +40,7 @@ func (s *server) restartWorld(clientId string) (*Reply, error) {
 			}
 		} else if clientId == game.Player2 {
 			if worldOne.Status == WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_CONFIRMS_RESTART {
-				worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_FIRST_MOVE
+				worldOne.Status = randomWorldOneFirstMover()
 				worldOne.Region.Objects = []*WorldOneObject{}
 				err := s.storage.updateWorld(world, clientId)
 				if err != nil {
