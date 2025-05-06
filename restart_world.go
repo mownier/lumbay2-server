@@ -21,7 +21,16 @@ func (s *server) restartWorld(clientId string) (*Reply, error) {
 			break
 		}
 		if clientId == game.Player1 {
-			if worldOne.Status != WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_CONFIRMS_RESTART {
+			if worldOne.Status == WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_CONFIRMS_RESTART {
+				worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_RESTARTED
+				worldOne.Region.Objects = []*WorldOneObject{}
+				err := s.storage.updateWorld(world, clientId)
+				if err != nil {
+					return nil, err
+				}
+				s.enqueueUpdatesAndSignal(game.Player1, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_RESTARTED))
+				s.enqueueUpdatesAndSignal(game.Player2, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_RESTARTED))
+			} else if worldOne.Status != WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_CONFIRMS_RESTART {
 				worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_CONFIRMS_RESTART
 				err := s.storage.updateWorld(world, clientId)
 				if err != nil {
@@ -29,7 +38,9 @@ func (s *server) restartWorld(clientId string) (*Reply, error) {
 				}
 				s.enqueueUpdatesAndSignal(game.Player1, s.newYouConfirmForRestartUpdate())
 				s.enqueueUpdatesAndSignal(game.Player2, s.newOtherConfirmsForRestartUpdate())
-			} else if worldOne.Status == WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_CONFIRMS_RESTART {
+			}
+		} else if clientId == game.Player2 {
+			if worldOne.Status == WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_CONFIRMS_RESTART {
 				worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_RESTARTED
 				worldOne.Region.Objects = []*WorldOneObject{}
 				err := s.storage.updateWorld(world, clientId)
@@ -38,9 +49,7 @@ func (s *server) restartWorld(clientId string) (*Reply, error) {
 				}
 				s.enqueueUpdatesAndSignal(game.Player1, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_RESTARTED))
 				s.enqueueUpdatesAndSignal(game.Player2, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_RESTARTED))
-			}
-		} else if clientId == game.Player2 {
-			if worldOne.Status != WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_CONFIRMS_RESTART {
+			} else if worldOne.Status != WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_CONFIRMS_RESTART {
 				worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_CONFIRMS_RESTART
 				err := s.storage.updateWorld(world, clientId)
 				if err != nil {
@@ -48,15 +57,6 @@ func (s *server) restartWorld(clientId string) (*Reply, error) {
 				}
 				s.enqueueUpdatesAndSignal(game.Player1, s.newOtherConfirmsForRestartUpdate())
 				s.enqueueUpdatesAndSignal(game.Player2, s.newYouConfirmForRestartUpdate())
-			} else if worldOne.Status == WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_CONFIRMS_RESTART {
-				worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_RESTARTED
-				worldOne.Region.Objects = []*WorldOneObject{}
-				err := s.storage.updateWorld(world, clientId)
-				if err != nil {
-					return nil, err
-				}
-				s.enqueueUpdatesAndSignal(game.Player1, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_RESTARTED))
-				s.enqueueUpdatesAndSignal(game.Player2, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_RESTARTED))
 			}
 		}
 	}
