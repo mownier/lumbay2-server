@@ -111,6 +111,12 @@ func (s *server) sendInitialUpdates(clientId string, stream LumbayLumbay_Subscri
 				if !worldOne.viableForLife() {
 					break
 				}
+				for _, score := range worldOne.Scores {
+					if score.RegionId == worldOne.Region.Id {
+						updates = append(updates, s.newWorldOneScoreUpdate(score))
+						break
+					}
+				}
 				if worldOne.restartIsInitiated() {
 					updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, worldOne.Status))
 					break

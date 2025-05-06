@@ -84,6 +84,17 @@ func (s *server) processWorldOneObject(clientId string, in *ProcessWorldOneObjec
 		if winner == WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_PLAYER_ONE ||
 			winner == WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_PLAYER_TWO {
 			worldOne.Status = worldOneStatusForWinner
+			for _, score := range worldOne.Scores {
+				if score.RegionId == worldOne.Region.Id {
+					switch winner {
+					case WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_PLAYER_ONE:
+						score.Player1 += 1
+					case WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_PLAYER_TWO:
+						score.Player2 += 1
+					}
+					break
+				}
+			}
 		}
 		worldOneWinner = winner
 		err = s.storage.updateWorld(world, clientId)
@@ -171,6 +182,17 @@ func (s *server) processWorldOneObject(clientId string, in *ProcessWorldOneObjec
 		if winner == WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_PLAYER_ONE ||
 			winner == WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_PLAYER_TWO {
 			worldOne.Status = worldOneStatusForWinner
+			for _, score := range worldOne.Scores {
+				if score.RegionId == worldOne.Region.Id {
+					switch winner {
+					case WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_PLAYER_ONE:
+						score.Player1 += 1
+					case WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_PLAYER_TWO:
+						score.Player2 += 1
+					}
+					break
+				}
+			}
 		}
 		worldOneWinner = winner
 		err = s.storage.updateWorld(world, clientId)
@@ -188,6 +210,13 @@ func (s *server) processWorldOneObject(clientId string, in *ProcessWorldOneObjec
 		worldOneWinner == WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_PLAYER_TWO {
 		player1Updates = append(player1Updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, worldOne.Status))
 		player2Updates = append(player2Updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, worldOne.Status))
+		for _, score := range worldOne.Scores {
+			if score.RegionId == worldOne.Region.Id {
+				player1Updates = append(player1Updates, s.newWorldOneScoreUpdate(score))
+				player2Updates = append(player2Updates, s.newWorldOneScoreUpdate(score))
+				break
+			}
+		}
 	}
 	s.enqueueUpdatesAndSignal(game.Player1, player1Updates...)
 	s.enqueueUpdatesAndSignal(game.Player2, player2Updates...)

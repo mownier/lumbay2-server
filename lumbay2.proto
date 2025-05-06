@@ -18,6 +18,7 @@ message Update {
         WorldOneRegionUpdate world_one_region_update = 5;
         WorldOneStatusUpdate world_one_status_update = 6;
         WorldOneObjectUpdate world_one_object_update = 7;
+        WorldOneScoreUpdate world_one_score_update = 8;
     }
 }
 
@@ -158,6 +159,13 @@ message WorldOne {
     WorldOneStatus status = 2;
     WorldOneRegion region = 3;
     repeated WorldOneRegionId regionIds = 4;
+    repeated WorldOneScore scores = 5;
+}
+
+message WorldOneScore {
+    WorldOneRegionId region_id = 1;
+    int32 player1 = 2;
+    int32 player2 = 3;
 }
 
 enum WorldOneStatus {
@@ -238,6 +246,10 @@ message WorldOneObjectUpdate {
     WorldOneObjectId object_id = 2;
     WorldOneObjectStatus object_status = 3;
     WorldOneObjectData object_data = 4;
+}
+
+message WorldOneScoreUpdate {
+    WorldOneScore score = 1;
 }
 
 message ProcessWorldOneObjectRequest {

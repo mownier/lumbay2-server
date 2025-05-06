@@ -30,12 +30,14 @@ func (s *server) startGame(clientId string) (*Reply, error) {
 		s.newWorldOneRegionUpdate(regionId),
 		s.newWorldOneObjectUpdate(in1),
 		s.newWorldOneStatusUpdate(regionId, world.GetWorldOne().Status),
+		s.newWorldOneScoreUpdate(world.GetWorldOne().Scores[0]),
 		s.newGameStatusUpdate(game.Status),
 	)
 	s.enqueueUpdatesAndSignal(game.Player2,
 		s.newWorldOneRegionUpdate(regionId),
 		s.newWorldOneObjectUpdate(in2),
 		s.newWorldOneStatusUpdate(regionId, world.GetWorldOne().Status),
+		s.newWorldOneScoreUpdate(world.GetWorldOne().Scores[0]),
 		s.newGameStatusUpdate(game.Status),
 	)
 	return s.newStartGameReply(), nil

@@ -22,6 +22,13 @@ func newWorldTypeWorldOne() *WorldOne {
 		Status:    randomWorldOneFirstMover(),
 		Region:    region,
 		RegionIds: []WorldOneRegionId{region.Id},
+		Scores: []*WorldOneScore{
+			{
+				RegionId: region.Id,
+				Player1:  0,
+				Player2:  0,
+			},
+		},
 	}
 }
 

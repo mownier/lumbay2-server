@@ -116,3 +116,9 @@ func (s *server) newWorldOneObjectUpdate(in *ProcessWorldOneObjectRequest) isUpd
 		},
 	}
 }
+
+func (s *server) newWorldOneScoreUpdate(score *WorldOneScore) isUpdate_Type {
+	return &Update_WorldOneScoreUpdate{
+		WorldOneScoreUpdate: &WorldOneScoreUpdate{Score: score},
+	}
+}
