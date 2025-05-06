@@ -13,20 +13,11 @@ message Update {
     int64 sequence_number = 1;
     oneof type {
         Ping ping = 2;
-        YouAreInGameUpdate you_are_in_game_update = 3;
-        WaitingForOtherPlayerUpdate waiting_for_other_player_update = 4;
-        ReadyToStartUpdate ready_to_start_update = 5;
-        GameCodeGeneratedUpdate game_code_generated = 6;
-        YouQuitTheGameUpdate you_quit_the_game_update = 7;
-        GameStartedUpdate game_started_update = 8;
-        WorldOneRegionUpdate world_one_region_update = 9;
-        WorldOneStatusUpdate world_one_status_update = 10;
-        WorldOneObjectUpdate world_one_object_update = 11;
-        YouConfirmForRestartUpdate you_confirm_for_restart_update = 12;
-        OtherConfirmsForRestartUpdate other_confirms_for_restart_update = 13;
-        YouExitWorldUpdate you_exit_world_update = 14;
-        OtherExitsWorldUpdate other_exits_world_update = 15;
-        OtherPlayerNotYetReadyUpdate other_player_not_yet_ready_update = 16;
+        GameStatusUpdate game_status_update = 3;
+        GameCodeGeneratedUpdate game_code_generated = 4;
+        WorldOneRegionUpdate world_one_region_update = 5;
+        WorldOneStatusUpdate world_one_status_update = 6;
+        WorldOneObjectUpdate world_one_object_update = 7;
     }
 }
 
@@ -135,46 +126,19 @@ message Client {
 message Ping {
 }
 
-message YouAreInGameUpdate {
-}
-
-message WaitingForOtherPlayerUpdate {
-}
-
-message ReadyToStartUpdate {
+message GameStatusUpdate {
+    GameStatus status = 1;
 }
 
 message GameCodeGeneratedUpdate {
     string game_code = 1;
 }
 
-message YouQuitTheGameUpdate {
-}
-
-message GameStartedUpdate {
-}
-
-message YouConfirmForRestartUpdate {
-}
-
-message OtherConfirmsForRestartUpdate {
-}
-
-message YouExitWorldUpdate {
-}
-
-message OtherExitsWorldUpdate {
-}
-
-message OtherPlayerNotYetReadyUpdate {
-}
-
 enum GameStatus {
-    NONE = 0;
-    WAITING_FOR_OTHER_PLAYER = 1;
-    READY_TO_START = 2;
-    STARTED = 3;
-    OTHER_PLAYER_NOT_YET_READY = 4;
+    GAME_STATUS_NONE = 0;
+    GAME_STATUS_WAITING_FOR_OTHER_PLAYER = 1;
+    GAME_STATUS_READY_TO_START = 2;
+    GAME_STATUS_STARTED = 3;
 }
 
 message World {
@@ -193,29 +157,24 @@ enum WorldId {
 message WorldOne {
     WorldOneStatus status = 2;
     WorldOneRegion region = 3;
-    repeated WorldOneRegion regions = 4;
+    repeated WorldOneRegionId regionIds = 4;
 }
 
 enum WorldOneStatus {
     WORLD_ONE_STATUS_NONE = 0;
-    WORLD_ONE_STATUS_YOUR_TURN_TO_MOVE = 1;
-    WORLD_ONE_STATUS_WAIT_FOR_YOUR_TURN = 2;
-    WORLD_ONE_STATUS_YOU_WIN = 3;
-    WORLD_ONE_STATUS_YOU_LOSE = 4;
-    WORLD_ONE_STATUS_YOU_WIN_BY_OUT_OF_MOVES = 5;
-    WORLD_ONE_STATUS_YOU_LOSE_BY_OUT_OF_MOVES = 6;
-    WORLD_ONE_STATUS_PLAYER_ONE_WINS = 7;
-    WORLD_ONE_STATUS_PLAYER_TWO_WINS = 8;
-    WORLD_ONE_STATUS_PLAYER_ONE_WINS_BY_OUT_OF_MOVES = 9;
-    WORLD_ONE_STATUS_PLAYER_TWO_WINS_BY_OUT_OF_MOVES = 10;
-    WORLD_ONE_STATUS_PLAYER_ONE_MOVED = 11;
-    WORLD_ONE_STATUS_PLAYER_TWO_MOVED = 12;
-    WORLD_ONE_STATUS_PLAYER_ONE_CONFIRMS_RESTART = 13;
-    WORLD_ONE_STATUS_PLAYER_TWO_CONFIRMS_RESTART = 14;
-    WORLD_ONE_STATUS_RESTARTED = 15;
-    WORLD_ONE_STATUS_PLAYER_ONE_EXITED = 16;
-    WORLD_ONE_STATUS_PLAYER_TWO_EXITED = 17;
-    WORLD_ONE_STATUS_ABANDONED = 18;
+    WORLD_ONE_STATUS_PLAYER_ONE_MOVED = 1;
+    WORLD_ONE_STATUS_PLAYER_TWO_MOVED = 2;
+    WORLD_ONE_STATUS_PLAYER_ONE_WINS = 3;
+    WORLD_ONE_STATUS_PLAYER_TWO_WINS = 4;
+    WORLD_ONE_STATUS_PLAYER_ONE_WINS_BY_OUT_OF_MOVES = 5;
+    WORLD_ONE_STATUS_PLAYER_TWO_WINS_BY_OUT_OF_MOVES = 6;
+    WORLD_ONE_STATUS_PLAYER_ONE_CONFIRMS_RESTART = 7;
+    WORLD_ONE_STATUS_PLAYER_TWO_CONFIRMS_RESTART = 8;
+    WORLD_ONE_STATUS_PLAYER_ONE_EXITED = 9;
+    WORLD_ONE_STATUS_PLAYER_TWO_EXITED = 10;
+    WORLD_ONE_STATUS_ABANDONED = 11;
+    WORLD_ONE_STATUS_PLAYER_ONE_FIRST_MOVE = 12;
+    WORLD_ONE_STATUS_PLAYER_TWO_FIRST_MOVE = 13;
 }
 
 message WorldOneRegion {

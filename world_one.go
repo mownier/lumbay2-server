@@ -19,9 +19,9 @@ func newWorldOne() *World {
 func newWorldTypeWorldOne() *WorldOne {
 	region := newWorldOneRegionOne()
 	return &WorldOne{
-		Status:  WorldOneStatus_WORLD_ONE_STATUS_NONE,
-		Region:  region,
-		Regions: []*WorldOneRegion{region},
+		Status:    WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_FIRST_MOVE,
+		Region:    region,
+		RegionIds: []WorldOneRegionId{region.Id},
 	}
 }
 
@@ -35,7 +35,9 @@ func newWorldOneRegionOne() *WorldOneRegion {
 func (w *WorldOne) needToMove() bool {
 	switch w.Status {
 	case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_MOVED,
-		WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_MOVED:
+		WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_MOVED,
+		WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_FIRST_MOVE,
+		WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_FIRST_MOVE:
 		return true
 	default:
 		return false

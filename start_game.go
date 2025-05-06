@@ -29,14 +29,14 @@ func (s *server) startGame(clientId string) (*Reply, error) {
 	s.enqueueUpdatesAndSignal(game.Player1,
 		s.newWorldOneRegionUpdate(regionId),
 		s.newWorldOneObjectUpdate(in1),
-		s.newWorldOneStatusUpdate(regionId, WorldOneStatus_WORLD_ONE_STATUS_YOUR_TURN_TO_MOVE),
-		s.newGameStartedUpdate(),
+		s.newWorldOneStatusUpdate(regionId, world.GetWorldOne().Status),
+		s.newGameStatusUpdate(game.Status),
 	)
 	s.enqueueUpdatesAndSignal(game.Player2,
 		s.newWorldOneRegionUpdate(regionId),
 		s.newWorldOneObjectUpdate(in2),
-		s.newWorldOneStatusUpdate(regionId, WorldOneStatus_WORLD_ONE_STATUS_WAIT_FOR_YOUR_TURN),
-		s.newGameStartedUpdate(),
+		s.newWorldOneStatusUpdate(regionId, world.GetWorldOne().Status),
+		s.newGameStatusUpdate(game.Status),
 	)
 	return s.newStartGameReply(), nil
 }

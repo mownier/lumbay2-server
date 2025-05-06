@@ -80,24 +80,6 @@ func (s *server) newRestartWorldReply() *Reply {
 	}
 }
 
-func (s *server) newWaitingForOtherPlayerUpdate() isUpdate_Type {
-	return &Update_WaitingForOtherPlayerUpdate{
-		WaitingForOtherPlayerUpdate: &WaitingForOtherPlayerUpdate{},
-	}
-}
-
-func (s *server) newReadyToStartUpdate() isUpdate_Type {
-	return &Update_ReadyToStartUpdate{
-		ReadyToStartUpdate: &ReadyToStartUpdate{},
-	}
-}
-
-func (s *server) newYouAreInGameUpdate() isUpdate_Type {
-	return &Update_YouAreInGameUpdate{
-		YouAreInGameUpdate: &YouAreInGameUpdate{},
-	}
-}
-
 func (s *server) newGameCodeGeneratedUpdate(gameCode string) isUpdate_Type {
 	return &Update_GameCodeGenerated{
 		GameCodeGenerated: &GameCodeGeneratedUpdate{
@@ -106,15 +88,9 @@ func (s *server) newGameCodeGeneratedUpdate(gameCode string) isUpdate_Type {
 	}
 }
 
-func (s *server) newYouQuitTheGameUpdate() isUpdate_Type {
-	return &Update_YouQuitTheGameUpdate{
-		YouQuitTheGameUpdate: &YouQuitTheGameUpdate{},
-	}
-}
-
-func (s *server) newGameStartedUpdate() isUpdate_Type {
-	return &Update_GameStartedUpdate{
-		GameStartedUpdate: &GameStartedUpdate{},
+func (s *server) newGameStatusUpdate(gameStatus GameStatus) isUpdate_Type {
+	return &Update_GameStatusUpdate{
+		GameStatusUpdate: &GameStatusUpdate{Status: gameStatus},
 	}
 }
 
@@ -138,35 +114,5 @@ func (s *server) newWorldOneObjectUpdate(in *ProcessWorldOneObjectRequest) isUpd
 			ObjectStatus: in.ObjectStatus,
 			ObjectData:   in.ObjectData,
 		},
-	}
-}
-
-func (s *server) newYouConfirmForRestartUpdate() isUpdate_Type {
-	return &Update_YouConfirmForRestartUpdate{
-		YouConfirmForRestartUpdate: &YouConfirmForRestartUpdate{},
-	}
-}
-
-func (s *server) newOtherConfirmsForRestartUpdate() isUpdate_Type {
-	return &Update_OtherConfirmsForRestartUpdate{
-		OtherConfirmsForRestartUpdate: &OtherConfirmsForRestartUpdate{},
-	}
-}
-
-func (s *server) newYouExitWorldUpdate() isUpdate_Type {
-	return &Update_YouExitWorldUpdate{
-		YouExitWorldUpdate: &YouExitWorldUpdate{},
-	}
-}
-
-func (s *server) newOtherExitsWorldUpdate() isUpdate_Type {
-	return &Update_OtherExitsWorldUpdate{
-		OtherExitsWorldUpdate: &OtherExitsWorldUpdate{},
-	}
-}
-
-func (s *server) newOtherPlayerNotYetReadyUpdate() isUpdate_Type {
-	return &Update_OtherPlayerNotYetReadyUpdate{
-		OtherPlayerNotYetReadyUpdate: &OtherPlayerNotYetReadyUpdate{},
 	}
 }

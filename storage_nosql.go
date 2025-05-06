@@ -88,7 +88,7 @@ func (s *storageNoSql) insertGame(player1 string) (*Game, error) {
 		Id:      uuid.New().String(),
 		Player1: player1,
 		Player2: "",
-		Status:  GameStatus_WAITING_FOR_OTHER_PLAYER,
+		Status:  GameStatus_GAME_STATUS_WAITING_FOR_OTHER_PLAYER,
 	}
 	gameData, err := proto.Marshal(game)
 	if err != nil {
@@ -305,9 +305,9 @@ func (s *storageNoSql) joinGame(clientId, gameCode string) (*Game, error) {
 			game.Player2 = clientId
 		}
 		if len(game.Player1) > 0 && len(game.Player2) > 0 {
-			game.Status = GameStatus_READY_TO_START
+			game.Status = GameStatus_GAME_STATUS_READY_TO_START
 		} else {
-			game.Status = GameStatus_WAITING_FOR_OTHER_PLAYER
+			game.Status = GameStatus_GAME_STATUS_WAITING_FOR_OTHER_PLAYER
 		}
 		updatedGameData, err := proto.Marshal(game)
 		if err != nil {
@@ -366,12 +366,12 @@ func (s *storageNoSql) quitGame(clientId string) (*Game, error) {
 			return sverror(codes.Internal, "failed to quit game because you are not part of the game", nil)
 		}
 		if len(game.Player1) == 0 && len(game.Player2) == 0 {
-			game.Status = GameStatus_NONE
+			game.Status = GameStatus_GAME_STATUS_NONE
 		} else {
-			game.Status = GameStatus_WAITING_FOR_OTHER_PLAYER
+			game.Status = GameStatus_GAME_STATUS_WAITING_FOR_OTHER_PLAYER
 		}
 		switch game.Status {
-		case GameStatus_NONE:
+		case GameStatus_GAME_STATUS_NONE:
 			err := txn.Delete([]byte(gameKey))
 			if err != nil {
 				return sverror(codes.Internal, "failed to quit game", err)
@@ -428,10 +428,10 @@ func (s *storageNoSql) startGame(clientId string) (*Game, bool, error) {
 			return sverror(codes.Internal, "failed to start game", err)
 		}
 		var initiatedAlready bool
-		if g.Status == GameStatus_STARTED {
+		if g.Status == GameStatus_GAME_STATUS_STARTED {
 			initiatedAlready = true
 		} else {
-			g.Status = GameStatus_STARTED
+			g.Status = GameStatus_GAME_STATUS_STARTED
 			initiatedAlready = false
 		}
 		gData, err := proto.Marshal(g)
@@ -701,10 +701,8 @@ func (s *storageNoSql) detachWorldFromClient(world *World, clientId string) (*Ga
 			return sverror(codes.Internal, "failed to detach world from client", err)
 		}
 		oldStatus := game.Status
-		if game.Status == GameStatus_OTHER_PLAYER_NOT_YET_READY {
-			game.Status = GameStatus_READY_TO_START
-		} else if game.Status == GameStatus_STARTED {
-			game.Status = GameStatus_OTHER_PLAYER_NOT_YET_READY
+		if game.Status != GameStatus_GAME_STATUS_READY_TO_START {
+			game.Status = GameStatus_GAME_STATUS_READY_TO_START
 		}
 		if oldStatus != game.Status {
 			bytes, err := proto.Marshal(game)

@@ -126,31 +126,13 @@ func (s *server) processWorldOneObject(clientId string, in *ProcessWorldOneObjec
 	player1Updates := []isUpdate_Type{s.newWorldOneObjectUpdate(in)}
 	player2Updates := []isUpdate_Type{s.newWorldOneObjectUpdate(in)}
 	if worldOne.needToMove() {
-		switch worldOne.Status {
-		case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_MOVED:
-			player1Updates = append(player1Updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_WAIT_FOR_YOUR_TURN))
-			player2Updates = append(player2Updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOUR_TURN_TO_MOVE))
-		case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_MOVED:
-			player1Updates = append(player1Updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOUR_TURN_TO_MOVE))
-			player2Updates = append(player2Updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_WAIT_FOR_YOUR_TURN))
-		}
+		player1Updates = append(player1Updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, worldOne.Status))
+		player2Updates = append(player2Updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, worldOne.Status))
 	}
 	if worldOneWinner == WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_PLAYER_ONE ||
 		worldOneWinner == WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_PLAYER_TWO {
-		switch worldOne.Status {
-		case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_WINS:
-			player1Updates = append(player1Updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOU_WIN))
-			player2Updates = append(player2Updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOU_LOSE))
-		case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_WINS_BY_OUT_OF_MOVES:
-			player1Updates = append(player1Updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOU_WIN_BY_OUT_OF_MOVES))
-			player2Updates = append(player2Updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOU_LOSE_BY_OUT_OF_MOVES))
-		case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_WINS:
-			player1Updates = append(player1Updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOU_LOSE))
-			player2Updates = append(player2Updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOU_WIN))
-		case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_WINS_BY_OUT_OF_MOVES:
-			player1Updates = append(player1Updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOU_LOSE_BY_OUT_OF_MOVES))
-			player2Updates = append(player2Updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOU_WIN_BY_OUT_OF_MOVES))
-		}
+		player1Updates = append(player1Updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, worldOne.Status))
+		player2Updates = append(player2Updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, worldOne.Status))
 	}
 	s.enqueueUpdatesAndSignal(game.Player1, player1Updates...)
 	s.enqueueUpdatesAndSignal(game.Player2, player2Updates...)

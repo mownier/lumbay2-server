@@ -5,17 +5,7 @@ func (s *server) joinGame(clientId, gameCode string) (*Reply, error) {
 	if err != nil {
 		return nil, err
 	}
-	switch game.Status {
-	case GameStatus_READY_TO_START:
-		s.enqueueUpdatesAndSignal(game.Player1, s.newReadyToStartUpdate())
-		s.enqueueUpdatesAndSignal(game.Player2, s.newReadyToStartUpdate())
-	case GameStatus_WAITING_FOR_OTHER_PLAYER:
-		if len(game.Player1) > 0 {
-			s.enqueueUpdatesAndSignal(game.Player1, s.newWaitingForOtherPlayerUpdate())
-		}
-		if len(game.Player2) > 0 {
-			s.enqueueUpdatesAndSignal(game.Player2, s.newWaitingForOtherPlayerUpdate())
-		}
-	}
+	s.enqueueUpdatesAndSignal(game.Player1, s.newGameStatusUpdate(game.Status))
+	s.enqueueUpdatesAndSignal(game.Player2, s.newGameStatusUpdate(game.Status))
 	return s.newJoinGameReply(), nil
 }

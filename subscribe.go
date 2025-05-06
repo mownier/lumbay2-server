@@ -99,14 +99,7 @@ func (s *server) sendInitialUpdates(clientId string, stream LumbayLumbay_Subscri
 		}
 	}
 	if game != nil {
-		switch game.Status {
-		case GameStatus_READY_TO_START:
-			updates = append(updates, s.newReadyToStartUpdate())
-		case GameStatus_STARTED:
-			updates = append(updates, s.newYouAreInGameUpdate())
-		case GameStatus_WAITING_FOR_OTHER_PLAYER:
-			updates = append(updates, s.newWaitingForOtherPlayerUpdate())
-		}
+		updates = append(updates, s.newGameStatusUpdate(game.Status))
 		gameCode, _ := s.storage.getGameCodeForGame(game.Id)
 		if len(gameCode) > 0 {
 			updates = append(updates, s.newGameCodeGeneratedUpdate(gameCode))
@@ -118,52 +111,15 @@ func (s *server) sendInitialUpdates(clientId string, stream LumbayLumbay_Subscri
 				if !worldOne.viableForLife() {
 					break
 				}
-				if worldOne.Status == WorldOneStatus_WORLD_ONE_STATUS_RESTARTED {
-					updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_RESTARTED))
-					break
-				}
 				if worldOne.restartIsInitiated() {
-					if clientId == game.Player1 {
-						switch worldOne.Status {
-						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_CONFIRMS_RESTART:
-							updates = append(updates, s.newYouConfirmForRestartUpdate())
-						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_CONFIRMS_RESTART:
-							updates = append(updates, s.newOtherConfirmsForRestartUpdate())
-						}
-					} else if clientId == game.Player2 {
-						switch worldOne.Status {
-						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_CONFIRMS_RESTART:
-							updates = append(updates, s.newYouConfirmForRestartUpdate())
-						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_CONFIRMS_RESTART:
-							updates = append(updates, s.newOtherConfirmsForRestartUpdate())
-						}
-					}
+					updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, worldOne.Status))
 					break
 				}
-				if clientId == game.Player1 {
-					if worldOne.needToDetermineFirstMover() {
-						worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_MOVED
-					}
-					if worldOne.needToMove() {
-						switch worldOne.Status {
-						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_MOVED:
-							updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_WAIT_FOR_YOUR_TURN))
-						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_MOVED:
-							updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOUR_TURN_TO_MOVE))
-						}
-					}
-				} else if clientId == game.Player2 {
-					if worldOne.needToDetermineFirstMover() {
-						worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_MOVED
-					}
-					if worldOne.needToMove() {
-						switch worldOne.Status {
-						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_MOVED:
-							updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_WAIT_FOR_YOUR_TURN))
-						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_MOVED:
-							updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOUR_TURN_TO_MOVE))
-						}
-					}
+				if worldOne.needToDetermineFirstMover() {
+					worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_FIRST_MOVE
+				}
+				if worldOne.needToMove() {
+					updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, worldOne.Status))
 				}
 				for _, object := range worldOne.Region.Objects {
 					in := &ProcessWorldOneObjectRequest{
@@ -174,32 +130,10 @@ func (s *server) sendInitialUpdates(clientId string, stream LumbayLumbay_Subscri
 					}
 					updates = append(updates, s.newWorldOneObjectUpdate(in))
 				}
-				_, worldOneWinner := worldOne.whoIsTheWinner()
+				worldOneStatus, worldOneWinner := worldOne.whoIsTheWinner()
 				if worldOneWinner == WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_PLAYER_ONE ||
 					worldOneWinner == WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_PLAYER_TWO {
-					if clientId == game.Player1 {
-						switch worldOne.Status {
-						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_WINS:
-							updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOU_WIN))
-						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_WINS_BY_OUT_OF_MOVES:
-							updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOU_WIN_BY_OUT_OF_MOVES))
-						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_WINS:
-							updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOU_LOSE))
-						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_WINS_BY_OUT_OF_MOVES:
-							updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOU_LOSE_BY_OUT_OF_MOVES))
-						}
-					} else if clientId == game.Player2 {
-						switch worldOne.Status {
-						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_WINS:
-							updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOU_LOSE))
-						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_WINS_BY_OUT_OF_MOVES:
-							updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOU_LOSE_BY_OUT_OF_MOVES))
-						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_WINS:
-							updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOU_WIN))
-						case WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_WINS_BY_OUT_OF_MOVES:
-							updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, WorldOneStatus_WORLD_ONE_STATUS_YOU_WIN_BY_OUT_OF_MOVES))
-						}
-					}
+					updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, worldOneStatus))
 				}
 			}
 		}
@@ -237,7 +171,10 @@ func (s *server) sendUpdates(clientId string, stream LumbayLumbay_SubscribeServe
 	return dequeueErr
 }
 
-func (s *server) enqueueUpdatesAndSignal(clientId string, updateTypes ...isUpdate_Type) {
+func (s *server) enqueueUpdatesAndSignal(clientId string, updateTypes ...isUpdate_Type) bool {
+	if len(clientId) == 0 {
+		return false
+	}
 	for _, u := range updateTypes {
 		s.storage.enqueueUpdate(clientId, u)
 	}
@@ -249,4 +186,5 @@ func (s *server) enqueueUpdatesAndSignal(clientId string, updateTypes ...isUpdat
 			// Non-blocking send if the channel is full
 		}
 	}
+	return true
 }

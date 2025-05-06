@@ -15,50 +15,32 @@ func (s *server) exitWorld(clientId string) (*Reply, error) {
 		if worldOne.Status == WorldOneStatus_WORLD_ONE_STATUS_ABANDONED {
 			break
 		}
-		if clientId == game.Player1 {
-			oldStatus := worldOne.Status
-			if worldOne.Status == WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_EXITED {
-				worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_ABANDONED
-			} else if worldOne.Status != WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_EXITED {
-				worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_EXITED
+		oldStatus := worldOne.Status
+		youArePlayer1 := clientId == game.Player1
+		youArePlayer2 := clientId == game.Player2
+		player1Exited := worldOne.Status == WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_EXITED
+		player2Exited := worldOne.Status == WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_EXITED
+		noOneYetExited := worldOne.Status != WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_EXITED && worldOne.Status == WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_EXITED
+		if (youArePlayer1 && player2Exited) || (youArePlayer2 && player1Exited) {
+			worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_ABANDONED
+		} else if youArePlayer1 && noOneYetExited {
+			worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_EXITED
+		} else if youArePlayer2 && noOneYetExited {
+			worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_EXITED
+		}
+		if oldStatus != worldOne.Status {
+			updatedGame, err := s.storage.detachWorldFromClient(world, clientId)
+			if err != nil {
+				return nil, err
 			}
-			youUpdates := []isUpdate_Type{s.newYouExitWorldUpdate()}
-			if oldStatus != worldOne.Status {
-				updatedGame, err := s.storage.detachWorldFromClient(world, clientId)
-				if err != nil {
-					return nil, err
-				}
-				switch updatedGame.Status {
-				case GameStatus_OTHER_PLAYER_NOT_YET_READY:
-					youUpdates = append(youUpdates, s.newOtherPlayerNotYetReadyUpdate())
-				case GameStatus_READY_TO_START:
-					youUpdates = append(youUpdates, s.newReadyToStartUpdate())
-				}
-			}
-			s.enqueueUpdatesAndSignal(game.Player1, youUpdates...)
-			s.enqueueUpdatesAndSignal(game.Player2, s.newOtherExitsWorldUpdate())
-		} else if clientId == game.Player2 {
-			oldStatus := worldOne.Status
-			if worldOne.Status == WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_EXITED {
-				worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_ABANDONED
-			} else if worldOne.Status != WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_EXITED {
-				worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_EXITED
-			}
-			youUpdates := []isUpdate_Type{s.newYouExitWorldUpdate()}
-			if oldStatus != worldOne.Status {
-				updatedGame, err := s.storage.detachWorldFromClient(world, clientId)
-				if err != nil {
-					return nil, err
-				}
-				switch updatedGame.Status {
-				case GameStatus_OTHER_PLAYER_NOT_YET_READY:
-					youUpdates = append(youUpdates, s.newOtherPlayerNotYetReadyUpdate())
-				case GameStatus_READY_TO_START:
-					youUpdates = append(youUpdates, s.newReadyToStartUpdate())
-				}
-			}
-			s.enqueueUpdatesAndSignal(game.Player1, s.newOtherExitsWorldUpdate())
-			s.enqueueUpdatesAndSignal(game.Player2, youUpdates...)
+			s.enqueueUpdatesAndSignal(game.Player1,
+				s.newWorldOneStatusUpdate(worldOne.Region.Id, worldOne.Status),
+				s.newGameStatusUpdate(updatedGame.Status),
+			)
+			s.enqueueUpdatesAndSignal(game.Player2,
+				s.newWorldOneStatusUpdate(worldOne.Region.Id, worldOne.Status),
+				s.newGameStatusUpdate(updatedGame.Status),
+			)
 		}
 	}
 	return s.newExitWorldReply(), nil
