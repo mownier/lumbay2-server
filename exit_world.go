@@ -20,7 +20,7 @@ func (s *server) exitWorld(clientId string) (*Reply, error) {
 		youArePlayer2 := clientId == game.Player2
 		player1Exited := worldOne.Status == WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_EXITED
 		player2Exited := worldOne.Status == WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_EXITED
-		noOneYetExited := worldOne.Status != WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_EXITED && worldOne.Status == WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_EXITED
+		noOneYetExited := worldOne.Status != WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_EXITED && worldOne.Status != WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_EXITED
 		if (youArePlayer1 && player2Exited) || (youArePlayer2 && player1Exited) {
 			worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_ABANDONED
 		} else if youArePlayer1 && noOneYetExited {
