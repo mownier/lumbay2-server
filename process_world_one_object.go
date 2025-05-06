@@ -105,6 +105,61 @@ func (s *server) processWorldOneObject(clientId string, in *ProcessWorldOneObjec
 		if worldObject.Data.GetLocation() == nil {
 			return nil, sverror(codes.InvalidArgument, "13 failed to process world one object", nil)
 		}
+
+		cells := map[int][2]int64{
+			0: {0, 0}, 1: {1, 0}, 2: {2, 0},
+			3: {0, 1}, 4: {1, 1}, 5: {2, 1},
+			6: {0, 2}, 7: {1, 2}, 8: {2, 2},
+		}
+
+		var objectCurrentIndex int = -1
+		var objectTargetIndex int = -1
+		for cellIndex, cell := range cells {
+			if cell[0] == worldObject.Data.GetLocation().X &&
+				cell[1] == worldObject.Data.GetLocation().Y {
+				objectCurrentIndex = cellIndex
+			}
+			if cell[0] == in.ObjectData.GetLocation().X &&
+				cell[1] == in.ObjectData.GetLocation().Y {
+				objectTargetIndex = cellIndex
+			}
+			if objectCurrentIndex != -1 && objectTargetIndex != -1 {
+				break
+			}
+		}
+
+		if objectCurrentIndex == -1 || objectTargetIndex == -1 {
+			return nil, sverror(codes.InvalidArgument, "14 failed to process world one object", nil)
+		}
+
+		movementPaths := map[int][]int64{
+			0: {1, 3, 4},
+			1: {0, 4, 2},
+			2: {1, 5, 4},
+			3: {0, 4, 6},
+			4: {0, 1, 2, 3, 5, 6, 7, 8},
+			5: {2, 4, 8},
+			6: {3, 4, 7},
+			7: {4, 6, 8},
+			8: {4, 5, 7},
+		}
+
+		for index, movementPath := range movementPaths {
+			if index == objectCurrentIndex {
+				validMove := false
+				for _, targetIndex := range movementPath {
+					if targetIndex == int64(objectTargetIndex) {
+						validMove = true
+						break
+					}
+				}
+				if !validMove {
+					return nil, sverror(codes.InvalidArgument, "15 failed to process world one object", nil)
+				}
+				break
+			}
+		}
+
 		worldObject.Data.GetLocation().X = in.ObjectData.GetLocation().X
 		worldObject.Data.GetLocation().Y = in.ObjectData.GetLocation().Y
 		if clientIsPlayer1 {
