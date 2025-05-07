@@ -115,10 +115,6 @@ func (s *server) sendInitialUpdates(clientId string, stream LumbayLumbay_Subscri
 						break
 					}
 				}
-				if worldOne.restartIsInitiated() {
-					updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, worldOne.Status))
-					break
-				}
 				if worldOne.needToDetermineFirstMover() {
 					worldOne.Status = WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_FIRST_MOVE
 				}
@@ -138,6 +134,9 @@ func (s *server) sendInitialUpdates(clientId string, stream LumbayLumbay_Subscri
 				if worldOneWinner == WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_PLAYER_ONE ||
 					worldOneWinner == WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_PLAYER_TWO {
 					updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, worldOneStatus))
+				}
+				if worldOne.restartIsInitiated() {
+					updates = append(updates, s.newWorldOneStatusUpdate(worldOne.Region.Id, worldOne.Status))
 				}
 			}
 		}
