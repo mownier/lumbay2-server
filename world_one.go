@@ -213,10 +213,12 @@ func (w *WorldOne) whoIsTheWinner() (WorldOneStatus, WorldOneObjectId) {
 
 	if w.Status == WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_MOVED {
 		playerTwoCanMove := true
+		playerTwoStoneCount := 0
 		for _, object := range objects {
 			if !object.stoneBelongsToPlayerTwo() {
 				continue
 			}
+			playerTwoStoneCount += 1
 			playerTwoCanMove = false
 			for movementPathIndex, cell := range cells {
 				if cell[0] == object.GetData().GetLocation().X &&
@@ -235,6 +237,9 @@ func (w *WorldOne) whoIsTheWinner() (WorldOneStatus, WorldOneObjectId) {
 				break
 			}
 		}
+		if playerTwoStoneCount < 3 {
+			playerTwoCanMove = true
+		}
 		if !playerTwoCanMove {
 			return WorldOneStatus_WORLD_ONE_STATUS_PLAYER_ONE_WINS_BY_OUT_OF_MOVES, WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_PLAYER_ONE
 		}
@@ -242,10 +247,12 @@ func (w *WorldOne) whoIsTheWinner() (WorldOneStatus, WorldOneObjectId) {
 
 	if w.Status == WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_MOVED {
 		playerOneCanMove := true
+		playerOneStoneCount := 0
 		for _, object := range objects {
 			if !object.stoneBelongsToPlayerOne() {
 				continue
 			}
+			playerOneStoneCount += 1
 			playerOneCanMove = false
 			for movementPathIndex, cell := range cells {
 				if cell[0] == object.GetData().GetLocation().X &&
@@ -263,6 +270,9 @@ func (w *WorldOne) whoIsTheWinner() (WorldOneStatus, WorldOneObjectId) {
 			if playerOneCanMove {
 				break
 			}
+		}
+		if playerOneStoneCount < 3 {
+			playerOneCanMove = true
 		}
 		if !playerOneCanMove {
 			return WorldOneStatus_WORLD_ONE_STATUS_PLAYER_TWO_WINS_BY_OUT_OF_MOVES, WorldOneObjectId_WORLD_ONE_OBJECT_ID_STONE_PLAYER_TWO
