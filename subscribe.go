@@ -1,8 +1,6 @@
 package main
 
 import (
-	"time"
-
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
@@ -69,7 +67,7 @@ func (s *server) cleanUpResources(clientId string) {
 }
 
 func (s *server) sendInitialUpdates(clientId string, stream LumbayLumbay_SubscribeServer) error {
-	updates := []isUpdate_Type{}
+	updates := []isUpdate_Type{s.newInitialDataUpdate(InitialDataStatus_INITIAL_DATA_STATUS_STARTED)}
 	world, _ := s.storage.getWorldForClient(clientId)
 	game, _ := s.storage.getGameForClient(clientId)
 	if world != nil {
@@ -144,12 +142,13 @@ func (s *server) sendInitialUpdates(clientId string, stream LumbayLumbay_Subscri
 			}
 		}
 	}
+	updates = append(updates, s.newInitialDataUpdate(InitialDataStatus_INITIAL_DATA_STATUS_ENDED))
 	for _, update := range updates {
 		err := stream.Send(&Update{Type: update})
 		if err != nil {
 			return err
 		}
-		<-time.After(100 * time.Millisecond)
+		//<-time.After(100 * time.Millisecond)
 	}
 	return nil
 }

@@ -19,6 +19,7 @@ message Update {
         WorldOneStatusUpdate world_one_status_update = 6;
         WorldOneObjectUpdate world_one_object_update = 7;
         WorldOneScoreUpdate world_one_score_update = 8;
+        InitialDataUpdate initial_data_update = 9;
     }
 }
 
@@ -260,4 +261,14 @@ message ProcessWorldOneObjectRequest {
 }
 
 message ProcessWorldOneObjectReply {
+}
+
+message InitialDataUpdate {
+    InitialDataStatus status = 1;
+}
+
+enum InitialDataStatus {
+    INITIAL_DATA_STATUS_NONE = 0;
+    INITIAL_DATA_STATUS_STARTED = 1;
+    INITIAL_DATA_STATUS_ENDED = 2;
 }

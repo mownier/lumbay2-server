@@ -122,3 +122,9 @@ func (s *server) newWorldOneScoreUpdate(score *WorldOneScore) isUpdate_Type {
 		WorldOneScoreUpdate: &WorldOneScoreUpdate{Score: score},
 	}
 }
+
+func (s *server) newInitialDataUpdate(status InitialDataStatus) isUpdate_Type {
+	return &Update_InitialDataUpdate{
+		InitialDataUpdate: &InitialDataUpdate{Status: status},
+	}
+}
