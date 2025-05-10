@@ -74,6 +74,9 @@ func (s *server) sendInitialUpdates(clientId string, stream LumbayLumbay_Subscri
 		switch world.Type.(type) {
 		case *World_WorldOne:
 			worldOne := world.GetWorldOne()
+			if !worldOne.viableForLife() {
+				break
+			}
 			updates = append(updates, s.newWorldOneRegionUpdate(worldOne.Region.Id))
 			if game != nil {
 				if clientId == game.Player1 {
