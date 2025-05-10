@@ -12,6 +12,8 @@ You must register first in ngrok website. Follow their instructions on how to in
 
 ```
 ngrok http 50052 --app-protocol=http2
+
+ngrok http --url=<free_static_url> 50052 --upstream-protocol=http2
 ```
 
 ## env
